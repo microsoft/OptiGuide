@@ -1,14 +1,22 @@
-# Project
+# OptiGuide: Large Language Models for Supply Chain Optimization
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+> Supply chain operations traditionally involve a variety of complex decision making problems. Over the last few decades, supply chains greatly benefited from advances in computation, which allowed the transition from manual processing to automation and cost-effective optimization. Nonetheless, business operators still need to spend substantial efforts in explaining and interpreting the optimization outcomes to stakeholders. Motivated by the recent advances in Large Language Models (LLMs), we study how this disruptive technology can help bridge the gap between supply chain automation and human comprehension and trust thereof. We design OptiGuide – a framework that accepts as input queries in plain text, and outputs insights about the underlying optimization outcomes. Our framework does not forgo the state-of-the-art combinatorial optimization technology, but rather leverages it to quantitatively answer what-if scenarios (e.g., how would the cost change if we used supplier B instead of supplier A for a given demand?). Importantly, our design does not require sending proprietary data over to LLMs, which can be a privacy concern in some circumstances. We demonstrate the effectiveness of our framework on a real server placement scenario within Microsoft’s cloud supply chain. Along the way, we develop a general evaluation benchmark, which can be used to evaluate the accuracy of the LLM output in other scenarios.
 
-As the maintainer of this project, please make a few updates:
+This repository will include the following material to open source the OptiGuide project:
+- [] Research code base for the OptiGuide framework
+- [] A demo notebook of the OptiGuide framework
+- [] Benchmarks (dataset) for evaluating language models for supply chain applications
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+## Citation
+Please cite the paper if you use this code in your own work: 
+```latex
+@article{li2023large,
+  title={Large Language Models for Supply Chain Optimization},
+  author={Li, Beibin and Mellou, Konstantina and Zhang, Bo and Pathuri, Jeevan and Menache, Ishai},
+  journal={arXiv preprint arXiv:2307.03875},
+  year={2023}
+}
+```
 
 ## Contributing
 

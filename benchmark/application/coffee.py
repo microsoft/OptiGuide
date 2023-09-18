@@ -1,6 +1,4 @@
-
 import time
-
 from gurobipy import GRB, Model
 
 # Example data
@@ -39,11 +37,10 @@ roasteries = list(
 suppliers = list(
     set(i[0] for i in shipping_cost_from_supplier_to_roastery.keys()))
 
-
-# OPTIGUIDE DATA CODE GOES HERE
-
 # Create a new model
 model = Model("coffee_distribution")
+
+# OPTIGUIDE DATA CODE GOES HERE
 
 # Create variables
 x = model.addVars(shipping_cost_from_supplier_to_roastery.keys(),
@@ -69,8 +66,7 @@ model.setObjective(
 # Conservation of flow constraint
 for r in set(i[1] for i in shipping_cost_from_supplier_to_roastery.keys()):
     model.addConstr(
-        sum(x[i]
-            for i in shipping_cost_from_supplier_to_roastery.keys()
+        sum(x[i] for i in shipping_cost_from_supplier_to_roastery.keys()
             if i[1] == r) == sum(
                 y_light[j] + y_dark[j]
                 for j in shipping_cost_from_roastery_to_cafe.keys()
@@ -79,21 +75,19 @@ for r in set(i[1] for i in shipping_cost_from_supplier_to_roastery.keys()):
 # Add supply constraints
 for s in set(i[0] for i in shipping_cost_from_supplier_to_roastery.keys()):
     model.addConstr(
-        sum(x[i]
-            for i in shipping_cost_from_supplier_to_roastery.keys()
+        sum(x[i] for i in shipping_cost_from_supplier_to_roastery.keys()
             if i[0] == s) <= capacity_in_supplier[s], f"supply_{s}")
 
 # Add demand constraints
 for c in set(i[1] for i in shipping_cost_from_roastery_to_cafe.keys()):
     model.addConstr(
-        sum(y_light[j]
-            for j in shipping_cost_from_roastery_to_cafe.keys()
+        sum(y_light[j] for j in shipping_cost_from_roastery_to_cafe.keys()
             if j[1] == c) >= light_coffee_needed_for_cafe[c],
         f"light_demand_{c}")
     model.addConstr(
-        sum(y_dark[j]
-            for j in shipping_cost_from_roastery_to_cafe.keys()
-            if j[1] == c) >= dark_coffee_needed_for_cafe[c], f"dark_demand_{c}")
+        sum(y_dark[j] for j in shipping_cost_from_roastery_to_cafe.keys()
+            if j[1] == c) >= dark_coffee_needed_for_cafe[c],
+        f"dark_demand_{c}")
 
 # Optimize model
 model.optimize()
@@ -110,4 +104,3 @@ if m.status == GRB.OPTIMAL:
     print(f'Optimal cost: {m.objVal}')
 else:
     print("Not solved to optimality. Optimization status:", m.status)
-

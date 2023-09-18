@@ -1,4 +1,4 @@
-CODE PATH: code/coffee.py
+CODE PATH: coffee.py
 
 QUESTION:
 What would happen if demand at cafe {{VALUE-CAFE}} increased by {{VALUE-NUMBER}}%?
@@ -35,7 +35,7 @@ CONSTRAINT CODE:
 m.addConstr(x[{{VALUE-SUPPLIER}},{{VALUE-ROASTERY}}] == 0, "_")
 TYPE: supply-roastery
 
-QUESTION: 
+QUESTION:
 Assume cafe {{VALUE-CAFE}} can exclusively buy coffee from roasting facility {{VALUE-ROASTERY}}, and conversely, roasting facility {{VALUE-ROASTERY}} can only sell its coffee to cafe {{VALUE-CAFE}}. How does that affect the outcome?
 VALUE-ROASTERY: random.choice(roasteries)
 VALUE-CAFE: random.choice(cafes)
@@ -46,8 +46,8 @@ for c in cafes:
 		m.addConstr(y_dark[{{VALUE-ROASTERY}}, c] == 0, "_")
 for r in roasteries:
 	if r != {{VALUE-ROASTERY}}:
-		m.addConstr(y_light[{{VALUE-ROASTERY}}, c] == 0, "_")
-		m.addConstr(y_dark[{{VALUE-ROASTERY}}, c] == 0, "_")
+		m.addConstr(y_light[r, {{VALUE-CAFE}}] == 0, "_")
+		m.addConstr(y_dark[r, {{VALUE-CAFE}}] == 0, "_")
 TYPE: exclusive-roastery-cafe
 
 QUESTION:

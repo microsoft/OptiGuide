@@ -1,4 +1,4 @@
-"""A simplified implementation of OptiGuide framework with FLAML.
+"""A simplified implementation of OptiGuide framework with AutoGen.
 For more details, read: https://arxiv.org/abs/2307.03875
 
 The OptiGuide agent will interact with LLM-based agents.
@@ -11,13 +11,12 @@ we would insert the newly added code.
 import re
 from typing import Dict, List, Optional, Union
 
+from autogen.agentchat import AssistantAgent
+from autogen.agentchat.agent import Agent
+from autogen.code_utils import extract_code
 from eventlet.timeout import Timeout
 from gurobipy import GRB
 from termcolor import colored
-
-from flaml.autogen.agentchat import AssistantAgent
-from flaml.autogen.agentchat.agent import Agent
-from flaml.autogen.code_utils import extract_code
 
 # %% System Messages
 WRITER_SYSTEM_MSG = """You are a chatbot to:
@@ -45,6 +44,9 @@ Note that your written code will be added to the lines with substring:
 "# OPTIGUIDE *** CODE GOES HERE"
 So, you don't need to write other code, such as m.optimize() or m.update().
 You just need to write code snippet in ```python ...``` block.
+
+Be mindful that order of the code, because some variables might not be defined
+yet when your code is inserted into the source code.
 """
 
 SAFEGUARD_SYSTEM_MSG = """

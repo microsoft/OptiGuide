@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="UTF-8") as f:
     long_description = f.read()
 
 install_requires = [
-    "openai", "diskcache", "termcolor", "flaml", "autogen", "eventlet",
+    "openai>=1.3", "diskcache", "termcolor", "pyautogen>=0.2.0", "eventlet",
     "gurobipy"
 ]
 

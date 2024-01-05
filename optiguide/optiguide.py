@@ -15,7 +15,8 @@ from autogen.agentchat import AssistantAgent
 from autogen.agentchat.agent import Agent
 from autogen.code_utils import extract_code
 from eventlet.timeout import Timeout
-from gurobipy import GRB
+# from gurobipy import GRB
+from pyomo.opt import TerminationCondition
 from termcolor import colored
 
 # %% System Messages
@@ -213,23 +214,26 @@ def _run_with_exec(src_code: str) -> Union[str, Exception]:
         timeout.cancel()
 
     try:
-        status = locals_dict["m"].Status
-        if status != GRB.OPTIMAL:
-            if status == GRB.UNBOUNDED:
+        # status = locals_dict["m"].Status
+        status = locals_dict["m"].solver.termination_condition
+        if status != TerminationCondition.optimal:
+            if status == TerminationCondition.unbounded:
                 ans = "unbounded"
-            elif status == GRB.INF_OR_UNBD:
+            elif status == TerminationCondition.infeasibleOrUnbounded:
                 ans = "inf_or_unbound"
-            elif status == GRB.INFEASIBLE:
+            elif status == TerminationCondition.infeasible:
                 ans = "infeasible"
-                m = locals_dict["m"]
-                m.computeIIS()
-                constrs = [c.ConstrName for c in m.getConstrs() if c.IISConstr]
-                ans += "\nConflicting Constraints:\n" + str(constrs)
+                # m = locals_dict["m"]
+                # m.computeIIS()
+                # constrs = [c.ConstrName for c in m.getConstrs() if c.IISConstr]
+                # ans += "\nConflicting Constraints:\n" + str(constrs)
             else:
                 ans = "Model Status:" + str(status)
         else:
+            # ans = "Optimization problem solved. The objective value is: " + str(
+            #     locals_dict["m"].objVal)
             ans = "Optimization problem solved. The objective value is: " + str(
-                locals_dict["m"].objVal)
+                locals_dict["model"].obj())
     except Exception as e:
         return e
 

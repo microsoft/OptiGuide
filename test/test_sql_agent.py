@@ -1,22 +1,19 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from optiguide.experimental.sql_agent import SQLAgent
 
 # Sample data for testing
-sql_file = "test_db.sqlite"
+sql_file = "test/test_Chinook.sqlite"
 name = "Test SQL Agent"
 max_sys_msg_tokens = 10000
-llm_config = {"config_list": [{"model": "gpt-4"}]}
+llm_config = {"config_list": [{"model": "gpt-4", "api_key": "fake key her."}]}
 
 
 class TestSQLAgent(unittest.TestCase):
 
     def setUp(self):
-        with patch('sqlite3.connect') as mock_connect:
-            mock_connect.return_value.cursor.return_value = MagicMock()
-            self.agent = SQLAgent(sql_file, name, max_sys_msg_tokens,
-                                  llm_config)
+        self.agent = SQLAgent(sql_file, name, max_sys_msg_tokens, llm_config)
 
     def test_initialization(self):
         self.assertEqual(self.agent.sql_file, sql_file)

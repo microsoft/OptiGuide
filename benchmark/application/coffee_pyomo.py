@@ -82,4 +82,13 @@ model.DarkDemandConstraint = Constraint(cafes, rule=dark_demand_constraint)
 solver = SolverFactory('glpk')
 m = solver.solve(model)
 
-print('Optimal cost:', model.obj())
+print(m)
+
+# OPTIGUIDE CONSTRAINT CODE GOES HERE
+
+print(time.ctime())
+if m.status == pyo.TerminationCondition.optimal:
+    print(f'Optimal cost: {m.objVal}')
+else:
+    print("Not solved to optimality. Optimization status:", m.status)
+

@@ -1,5 +1,5 @@
-from pyomo.environ import ConcreteModel, Var, Integers, Objective, Constraint, minimize, SolverFactory
-
+from pyomo.environ import ConcreteModel, Var, Integers, Objective, Constraint, minimize, SolverFactory, TerminationCondition
+import time
 # Example data
 capacity_in_supplier = {'supplier1': 150, 'supplier2': 50, 'supplier3': 100}
 shipping_cost_from_supplier_to_roastery = {
@@ -82,13 +82,10 @@ model.DarkDemandConstraint = Constraint(cafes, rule=dark_demand_constraint)
 solver = SolverFactory('glpk')
 m = solver.solve(model)
 
-print(m)
-
 # OPTIGUIDE CONSTRAINT CODE GOES HERE
-
 print(time.ctime())
-if m.status == pyo.TerminationCondition.optimal:
-    print(f'Optimal cost: {m.objVal}')
+if m.solver.termination_condition == TerminationCondition.optimal:
+    print(f'Optimal cost: {model.obj()}')
 else:
-    print("Not solved to optimality. Optimization status:", m.status)
+    print("Not solved to optimality. Optimization status:", m.solver.termination_condition)
 

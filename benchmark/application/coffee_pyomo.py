@@ -26,6 +26,8 @@ dark_coffee_needed_for_cafe = {'cafe1': 20, 'cafe2': 20, 'cafe3': 100}
 # Create a new model
 model = ConcreteModel()
 
+# OPTIGUIDE DATA CODE GOES HERE
+
 # Variables
 model.x = Var(shipping_cost_from_supplier_to_roastery.keys(),
               domain=Integers, bounds=(0, None))
@@ -77,12 +79,13 @@ model.SupplyConstraint = Constraint(suppliers, rule=supply_constraint)
 model.LightDemandConstraint = Constraint(cafes, rule=light_demand_constraint)
 model.DarkDemandConstraint = Constraint(cafes, rule=dark_demand_constraint)
 
+solver = SolverFactory('glpk')
+# OPTIGUIDE CONSTRAINT CODE GOES HERE
+
 # Solve
 # You can change the solver as per your requirement
-solver = SolverFactory('glpk')
 m = solver.solve(model)
 
-# OPTIGUIDE CONSTRAINT CODE GOES HERE
 print(time.ctime())
 if m.solver.termination_condition == TerminationCondition.optimal:
     print(f'Optimal cost: {model.obj()}')

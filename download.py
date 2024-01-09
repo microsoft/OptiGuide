@@ -145,7 +145,7 @@ def special_handle(url: str, code: str) -> str:
     if url.find("netflow") >= 0:
 
         extra_code = """
-# For retrival in question markdown, etc.
+# For retrieval in question markdown, etc.
 original_solution = [
     ("Pencils", "Detroit", "Boston"),
     ("Pencils", "Denver", "New York"),

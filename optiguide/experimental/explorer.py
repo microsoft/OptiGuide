@@ -137,7 +137,6 @@ class ProjectAgent(AssistantAgent):
             repository_root=root,
             # TODO: add back the support of private files in the
             # future.
-            #  self.password, private_files=[],
             code_execution_config=code_execution_config)
         self.register_reply([Agent, None], ProjectAgent._repo_generate_reply)
 
@@ -198,8 +197,6 @@ class RepositoryEnv(UserProxyAgent):
     def __init__(
         self,
         repository_root: str,
-        password: Optional[str] = "",
-        private_files: Optional[list] = [],
         code_execution_config: Optional[Dict] = {},
     ):
         """
@@ -226,12 +223,6 @@ class RepositoryEnv(UserProxyAgent):
         self.sandbox_dir = os.path.abspath(self.sandbox_dir).rstrip("/")
         code_execution_config["work_dir"] = self.sandbox_dir
         code_execution_config["use_docker"] = False
-
-        # # Store the hashed password for identity verification
-        # self._sandbox_id = ''.join(
-        #     random.choices(string.ascii_uppercase + string.digits, k=10))
-        # self._hashed_password = self._hash_password(password)
-        # self.private_files = private_files
 
         try:
             shutil.copytree(self.repo_path,

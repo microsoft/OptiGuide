@@ -94,7 +94,8 @@ When everything is done, reply "TERMINATE" as the single word in response.
 """
 
 CONSTRUCTION_QUESTIONS = [
-    "Read files, understand the repo, and summarize the knowledge in 500 words.",
+    "Read important files, understand the repo, and summarize the "
+    "knowledge in 500 words.",
     "What programming languages are mainly used in this project?",
 ]
 

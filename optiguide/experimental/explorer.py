@@ -1,111 +1,184 @@
+import logging
 import os
-import random
+import pathlib
+import re
 import shutil
-import string
 import subprocess
+import sys
 import tempfile
-from hashlib import sha256
-from typing import Dict, Literal, Optional, Union
+import time
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from hashlib import md5
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
-import tiktoken
-from autogen import AssistantAgent, UserProxyAgent
+from autogen import Agent, AssistantAgent, UserProxyAgent
+from autogen.code_utils import _cmd, content_str
+from autogen.oai import OpenAIWrapper
 from termcolor import colored
 
+try:
+    import docker
+except ImportError:
+    docker = None
+
+##########
+CODE_BLOCK_PATTERN = r"```[ \t]*(\w+)?[ \t]*\r?\n(.*?)\r?\n[ \t]*```"
+WORKING_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                           "extensions")
+UNKNOWN = "unknown"
+TIMEOUT_MSG = "Timeout"
+DEFAULT_TIMEOUT = 600
+WIN32 = sys.platform == "win32"
+PATH_SEPARATOR = WIN32 and "\\" or "/"
+
+logger = logging.getLogger(__name__)
+
 ########## Constants Setup ##########
-SAFE_FLAG = "<SAFE>"
-SUPPORTED_CMDS = ["cd", "ls", "cat", "head", "echo", "python", "pip", "exit"]
-# Common programming language suffixes
-CODE_SUFFIXES = (".py", ".c", ".cpp", ".cxx", ".cc", ".h", ".hpp", ".hxx",
-                 ".cs", ".java", ".go")
+# Ignored with the AutoGen implementation, where privacy is not considered yet.
 
-# Common data file suffixes
-DATA_SUFFIXES = (".csv", ".tsv", ".json")
+# SAFE_FLAG = "<SAFE>"
+# SUPPORTED_CMDS = ["cd", "ls", "cat", "head", "echo", "python", "pip", "exit"]
+# # Common programming language suffixes
+# CODE_SUFFIXES = (".py", ".c", ".cpp", ".cxx", ".cc", ".h", ".hpp", ".hxx",
+#                  ".cs", ".java", ".go")
 
-# Common text file suffixes
-TEXT_SUFFIXES = (".txt", ".md")
+# # Common data file suffixes
+# DATA_SUFFIXES = (".csv", ".tsv", ".json")
+
+# # Common text file suffixes
+# TEXT_SUFFIXES = (".txt", ".md")
 
 ########## System Message ##########
 DEFAULT_SYSTEM_MESSAGE = """
 You are a helpful AI assistant to help code editing in a large code repo.
-You can explore the code repo by sending me system commands: ls, cd, cat, and echo.
+You should answer my questions by using data and documents inside the repository.
+You can explore the code repo by sending me system commands: ls, cd, cat, and python.
 
 The tools you can use
-1.  Read files by using `cat`.
-2. You can only read one file a time to avoid memory and space limits,
-    and you should avoid reading a file multiple times.
-3.  Write memory files by using `echo`.
-4.  List all files with `ls`.
-5.  Change directory to a folder with `cd`.
+1. Read files by using `cat`.
+2. You can perform one action to avoid memory and space limits.
+3. List all files with `ls`.
+4. Change directory to a folder with `cd`.
+5. Write Python code in code block, which will be executed and print messages will be
+    returned.
 
 --- Use the format ---
 REASON: explain why you want to perform an action
 ACTION:
-```bash
+```sh
 YOU CODE GOES HERE
 ```
+
+You should provide only one set of code in each reply, because I can not run many
+things at once.
 ------
 
 Note that:
-1.  Initially, you are at the root of the repo.
-2. You can ONLY use linux commands: cd, ls, cat, echo
-3. I can run your commands, but I don't have intelligence to answer your questions.
+1. Initially, you are at the root of the repo.
+2. You can ONLY use linux commands: cd, ls, cat, and python.
+3. I can run your commands and Python code, but I don't have intelligence to answer
+    your questions.
 4. You are all by yourself, and you need to explore the code repo by yourself.
 5. You can use various techniques here, such as summarizing a book, thinking about
     code logic, architecture design, and performing analyses.
 6. Feel free to use any other abilities, such as planning, executive functioning, etc.
 7. You may need to cross reference different files!
+8. If you can not access any folder, it is probably you are at the wrong location. Use
+    `pwd` to check your current location.
+
+When everything is done, reply "TERMINATE" as the single word in response.
+
 
 ----- tree structure of directories in the repo ------
 {all_files}
 """
 
 CONSTRUCTION_QUESTIONS = [
-    ("Read the repo, understand what it means and all its files. "
-     "Then, summarize the knowledge in SUMMARY.txt"),
+    "Read files, understand the repo, and summarize the knowledge in 500 words.",
+    "What programming languages are mainly used in this project?",
 ]
 
 
 ########## Exploration Agent ##########
 class ProjectAgent(AssistantAgent):
     """
-    The exploration agent is a special agent that helps the user explore the code repo.
-
+    The project agent is a special agent that helps the user explore the code repo.
     """
 
     def __init__(self,
                  name,
                  root,
-                 data_path,
                  max_consecutive_auto_reply=10,
                  llm_config: Optional[Union[Dict, Literal[False]]] = None,
+                 code_execution_config: Optional[Dict] = None,
                  description: Optional[str] = "",
                  **kwargs):
+        self.root = root
 
-        system_message = open("prompt_templates/explore_prompt.md", "r").read()
-        system_message = system_message.format(
+        _system_message = DEFAULT_SYSTEM_MESSAGE.format(
             root=os.path.basename(root),
             root2=os.path.basename(root),
             all_files=display_files_recursively(root))
 
-        is_termination_msg = ""
+        # is_termination_msg = lambda x: content_str(x).strip().rstrip() == "exit"
 
         super().__init__(
-            name,
-            system_message,
-            is_termination_msg,
-            max_consecutive_auto_reply,
+            name=name,
+            system_message=_system_message,
+            # is_termination_msg,
+            max_consecutive_auto_reply=max_consecutive_auto_reply,
             human_input_mode="NEVER",
             llm_config=llm_config,
             description=description,
             **kwargs,
         )
 
-        self.data_path = data_path
+        self.env = RepositoryEnv(
+            repository_root=root,
+            # TODO: add back the support of private files in the
+            # future.
+            #  self.password, private_files=[],
+            code_execution_config=code_execution_config)
+        self.register_reply([Agent, None], ProjectAgent._repo_generate_reply)
 
-        for msg in self.msgs:
-            print(colored_string(msg))
+        self._warm_up()
 
-        os.chdir(root)
+    def _warm_up(self):
+        for msg in CONSTRUCTION_QUESTIONS:
+            self.env.initiate_chat(self, message=msg, clear_history=False)
+
+    def _repo_generate_reply(
+        self,
+        messages: Optional[List[Dict]] = None,
+        sender: Optional[Agent] = None,
+        config: Optional[OpenAIWrapper] = None,
+    ) -> Tuple[bool, Union[str, Dict, None]]:
+        """Generate a reply using autogen.oai."""
+
+        client = self.client if config is None else config
+        if client is None:
+            return False, None
+        if messages is None:
+            messages = self._oai_messages[sender]
+
+        if not isinstance(sender, RepositoryEnv):
+            # Not the sub-module. So, we delegate to the environment.
+            self.env.initiate_chat(self,
+                                   message=messages[-1],
+                                   clear_history=False)
+            _messages = self._oai_messages[self.env]
+
+            # Find the answer reversely
+            for i in range(len(_messages) - 1, -1, -1):
+                if content_str(_messages[i]["content"]) != "TERMINATE":
+                    return True, content_str(_messages[i]["content"])
+
+            # Unable to retrieve the answer, because all messages are TERMINATE.
+            return False, None
+        else:
+            # the sender is the environment, and we need standard generate_reply (e.g.,
+            # generate_oai_reply).
+            return False, None
 
 
 ########## Environments ##########
@@ -124,47 +197,67 @@ class RepositoryEnv(UserProxyAgent):
 
     def __init__(
         self,
-        dataset_path: str,
-        password: str,
-        private_files: list = [],
+        repository_root: str,
+        password: Optional[str] = "",
+        private_files: Optional[list] = [],
+        code_execution_config: Optional[Dict] = {},
     ):
         """
         Wraps the dataset folder.
         Prevents any system commands from ruining the original dataset.
 
         Args:
-        - dataset_path (str): The path to the dataset.
+        - repository_root (str): The path to the dataset.
         """
-        # Use absolute path
-        self.working_dir = os.path.abspath(".").replace("\\", "/") + "/"
-        self.dataset_path = os.path.abspath(dataset_path).replace("\\",
+
+        # Override the "work_dir" with sandbox folder.
+        if code_execution_config is None:
+            code_execution_config = {}
+        _working_dir = code_execution_config.get("work_dir", ".")
+        _working_dir = _working_dir.replace("\\", "/")
+        os.makedirs(_working_dir, exist_ok=True)
+        self.repo_path = os.path.abspath(repository_root).replace("\\",
                                                                   "/") + "/"
 
         # Copy dataset to a temporary directory in the working directory
         # Also, normalize the windows file path
-        self.sandbox_dir = tempfile.mkdtemp(dir=self.working_dir).replace(
-            "\\", "/") + "/"
+        self.sandbox_dir = tempfile.mkdtemp(dir=_working_dir).replace(
+            "\\", "/")
+        self.sandbox_dir = os.path.abspath(self.sandbox_dir).rstrip("/")
+        code_execution_config["work_dir"] = self.sandbox_dir
+        code_execution_config["use_docker"] = False
 
-        # Store the hashed password for identity verification
-        self._sandbox_id = ''.join(
-            random.choices(string.ascii_uppercase + string.digits, k=10))
-        self._hashed_password = self._hash_password(password)
-        self.private_files = private_files
+        # # Store the hashed password for identity verification
+        # self._sandbox_id = ''.join(
+        #     random.choices(string.ascii_uppercase + string.digits, k=10))
+        # self._hashed_password = self._hash_password(password)
+        # self.private_files = private_files
 
-        # Ignore hidden files and directories
-        def ignore(directory, filenames):
-            return [fn for fn in filenames if fn.startswith('.')]
+        try:
+            shutil.copytree(self.repo_path,
+                            self.sandbox_dir,
+                            ignore=shutil.ignore_patterns('.*', '*.pyc'),
+                            dirs_exist_ok=True)
+        except Exception as e:
+            raise Exception(
+                f"Failed to copy data from {self.repo_path} to {self.sandbox_dir}"
+            ) from e
 
-        shutil.copytree(self.dataset_path,
-                        self.sandbox_dir,
-                        ignore=ignore,
-                        dirs_exist_ok=True)
+        # Checkpoint cwd to avoid outside changes
+        # self.cwd = self.sandbox_dir
         print(
             colored(f"Data copied to temporary directory: {self.sandbox_dir}",
                     "green"))
 
-        # Checkpoint cwd to avoid outside changes
-        self.cwd = self.sandbox_dir
+        super().__init__(name="Repository Environment Agent",
+                         system_message="",
+                         max_consecutive_auto_reply=1000000,
+                         human_input_mode="NEVER",
+                         function_map=None,
+                         code_execution_config=code_execution_config,
+                         llm_config=False,
+                         default_auto_reply="TERMINATE",
+                         description="")
 
     def __del__(self):
         # Upon deletion, clean up the temporary directory
@@ -177,334 +270,41 @@ class RepositoryEnv(UserProxyAgent):
             # Unix
             os.system('rm -rf "{}"'.format(self.sandbox_dir))
 
-    def _hash_password(self, password: str) -> str:
-        return sha256(
-            (password + self._sandbox_id).encode("utf-8")).hexdigest()
+    def _get_loc(self, **kwargs):
+        code = "\npwd\n"
+        kwargs.pop("lang", None)
+        exit_code, logs, image = execute_code(code, lang="sh", **kwargs)
+        loc = os.path.relpath(logs.strip().rstrip(), self.sandbox_dir)
+        import pdb
+        pdb.set_trace()
+        return f"\n\n\nSide Note: current location is at `{loc}`"
 
-    def safety_check(self, cmd: list, password: str) -> str:
-        """
-        Return "SAFE" iff the cmd is safe to run.
-        Otherwise, return error message.
+    # Override AutoGen ConversableAgent's run_code
+    def run_code(self, code, **kwargs):
+        """Run the code and return the result.
 
+        Override this function to modify the way to run the code.
         Args:
-        - cmd (list): a single command splitted into a list of arguments.
-        - password (str): the password for identity verification.
+            code (str): the code to be executed.
+            **kwargs: other keyword arguments.
 
         Returns:
+            A tuple of (exitcode, logs, image).
+            exitcode (int): the exit code of the code execution.
+            logs (str): the logs of the code execution.
+            image (str or None): the docker image used for the code execution.
         """
-        # First check if password is correct
-        if self._hash_password(password) != self._hashed_password:
-            return "Error: Wrong password!"
-
-        # Restrict command type
-        if cmd[0] == "exit":
-            raise NotImplementedError(
-                "exit should be handled outside of run_command().")
-        if cmd[0] not in SUPPORTED_CMDS:
-            return f"Error: You can only use {', '.join(SUPPORTED_CMDS[:-1])}."
-
-        # Test if the target file/dir is inside the sandbox
-        target_dirs = get_target_dirs(cmd)
-        for target_dir in target_dirs:
-            if "Error" in target_dir:
-                return target_dir
-            if not target_dir.startswith(self.sandbox_dir):
-                return (
-                    f"Error: You cannot access file {target_dir} "
-                    f"outside the repo! You are now at {self._get_relative_cwd()}"
-                )
-
-        # Check if the target file is private
-        files = get_file_names(cmd)
-        for file in files:
-            if file in self.private_files:
-                return f"Error: You cannot access a private file {file}!"
-
-        return SAFE_FLAG
-
-    def run_command(self, cmd: list, password: str) -> str:
-        """Wrapper function for self._run_command().
-        Run a bash command in the dataset sandbox.
-
-        The supported tools are:
-        "cd", "ls", "cat", "head", "tail", "echo", "python", "pip"
-        "exit" is handled outside of this function.
-
-        Args:
-        - cmd (list): a single command splitted into a list of arguments.
-        - password (str): the password for identity verification.
-
-        Returns:
-        - str: the execution result of the given command. If any errors
-        occurred, then just return the error message.
-        """
-        # Restore to the checkpointed cwd
-        _cwd = os.getcwd()
-        os.chdir(self.cwd)
-
-        safety_check_result = self.safety_check(cmd, password)
-
-        if safety_check_result != SAFE_FLAG:
-            ret = safety_check_result
+        lang = kwargs.get("lang", None)
+        if lang in ["bash", "shell", "sh"]:
+            kwargs["lang"] = "sh"
+            # code += """\n\necho Side Note: Current Dir is "$(pwd)"\n"""
+            exit_code, logs, image = execute_code(code, **kwargs)
+            # logs += self._get_loc(**kwargs)
         else:
-            ret = self._run_command(cmd)
+            exit_code, logs, image = execute_code(code, **kwargs)
 
-        # Checkpoint cwd
-        self.cwd = os.getcwd().replace("\\", "/") + "/"
-        os.chdir(_cwd)
-
-        return ret
-
-    def _run_command(self, cmd: list) -> str:
-        """Inner function for self.run_command().
-        Run a bash command in the dataset sandbox.
-
-        The supported tools are:
-        "cd", "ls", "cat", "head", "tail", "echo", "python", "pip".
-        "exit" is handled outside of this function.
-
-        Args:
-        - cmd (list): a single command splitted into a list of arguments.
-
-        Returns:
-        - str: the execution result of the given command. If any errors
-        occurred, then just return the error message.
-        """
-
-        # Check if echo outputs to a file
-        if cmd[0] == "echo" and len(cmd) == 3:
-            return "Warning: echo command without output file, ignored."
-
-        # Run the command
-        try:
-            if cmd[0] == "cd":
-                # cd cannot be handled by subprocess
-                os.chdir(cmd[1])
-                return "Success: Now at " + self._get_relative_cwd()
-            else:
-                result = subprocess.run(' '.join(cmd),
-                                        shell=True,
-                                        capture_output=True)
-                return self.respond_cmd(cmd, result)
-        except Exception as e:
-            return "Error: " + str(e)
-
-    def respond_cmd(self, cmd: list, result) -> str:
-        """
-        Generate the response for the result of a command.
-
-        Args:
-        - cmd (list): a single command splitted into a list of arguments.
-        - result (subprocess.CompletedProcess): the result of the command.
-
-        Returns:
-        - str: the response for the result of the command.
-        """
-        rstdout = result.stdout.decode('utf-8')
-        rstderr = hide_root(result.stderr.decode('utf-8'), self.sandbox_dir)
-
-        if cmd[0] == "ls":
-            return "Success: The result of ls is:\n" + rstdout
-        elif cmd[0] in ["cat", "head", "tail"]:
-            fn = get_file_names(cmd)[0]
-            return (f"Success: The content of {fn} is:\n" +
-                    trunc_text(fn, rstdout))
-        elif cmd[0] == "echo":
-            return f"Success: echoed to {cmd[-1]}"
-        elif cmd[0] == "python":
-            if rstderr != "":
-                return f"Error: {rstderr}"
-            else:
-                return f"Success: The output of python is:\n{rstdout}"
-        elif cmd[0] == "pip":
-            if rstderr != "":
-                return f"Error: {rstderr}"
-            else:
-                return "Success: pip succeeded"
-        else:
-            raise NotImplementedError(f"Does not support command: {cmd[0]}")
-
-    def get_changed_files(self) -> dict:
-        """
-        Return the name and content of changed files in the sandbox.
-
-        Returns:
-        - dict: key is relative file path, value is the content in bytes.
-        """
-        original_files = set(list_files(self.dataset_path))
-        current_files = set(list_files(self.sandbox_dir))
-        changed_files = list(current_files - original_files)
-
-        common_files = current_files.intersection(original_files)
-
-        for file in common_files:
-            file = file.replace("\\", "/")
-
-            original_file_path = self.dataset_path + file
-            current_file_path = self.sandbox_dir + file
-
-            original_file_content = open(original_file_path, "rb").read()
-            current_file_content = open(current_file_path, "rb").read()
-
-            if original_file_content != current_file_content:
-                changed_files.append(file)
-
-        print(colored("List of changed files:", "yellow"))
-        print(changed_files)
-
-        return {
-            file: open(self.sandbox_dir + file, "rb").read()
-            for file in changed_files
-        }
-
-    def _get_relative_cwd(self):
-        "Return the relative path to the sandbox's root directory."
-        return os.path.relpath(os.getcwd().replace('\\', '/'),
-                               self.sandbox_dir) + "/"
-
-
-########## Utils
-def trunc_text(file: str, content: str) -> str:
-    """
-    Truncate the content of a file for `cat`, `head`, `tail` command if it is too long.
-    It will truncate to a maximum line and a maximum token, depending on the file type.
-
-    Args:
-    - file_name (str): The name of the file.
-    - content (str): The content of the file.
-
-    Returns:
-    - str: The truncated content.
-    """
-
-    # Define truncate function
-    def _trunc_text(content: str, max_line: int, max_token: int) -> str:
-        """
-        Truncate the content of a file for `cat`, `head`, `tail` command
-        if it is too long.
-        Truncate to `max_line` lines or `max_token` tokens, whichever is smaller.
-
-        Args:
-        - file_name (str): The name of the file.
-        - content (str): The content of the file.
-        - max_line (int): The maximum number of lines to display.
-        - max_token (int): The maximum number of tokens to display.
-
-        Returns:
-        - str: The truncated content.
-        """
-        truncated = False
-
-        lines = content.split("\n")
-        if len(lines) > max_line:
-            content = "\n".join(lines[:max_line])
-            truncated = True
-
-        encoder = tiktoken.encoding_for_model("gpt-4")
-        encoded = encoder.encode(content)
-        if len(encoded) > max_token:
-            content = encoder.decode(encoded[:max_token])
-            truncated = True
-
-        if truncated:
-            content += ("\n...\nLarge file, only display first "
-                        f"{max_line} lines and {max_token} tokens.\n")
-
-        return content
-
-    if file[-1] in ['"', "'"]:
-        file = file[1:-1]
-
-    # Truncate the content depending on file type
-    if file.endswith(CODE_SUFFIXES):
-        return _trunc_text(content, 1000, 1000)
-    elif file.endswith(DATA_SUFFIXES):
-        return _trunc_text(content, 5, 500)
-    elif file.endswith(TEXT_SUFFIXES):
-        return _trunc_text(content, 100, 1000)
-    else:
-        return _trunc_text(content, 10, 1000)
-
-
-def colored_string(msg: str) -> str:
-    color_dict = {"system": "blue", "user": "green", "assistant": "cyan"}
-    return colored(msg[1], color_dict[msg[0]])
-
-
-def list_files(directory: str, ignore_hidden: bool = True) -> list:
-    """
-    List all files in a directory (recursively).
-
-    Args:
-    - directory (str): The path to the directory to list files from.
-    - ignore_hidden (bool, optional): Whether to ignore hidden files.
-        Defaults to True.
-
-    Returns:
-    - list of str: A list of file paths relative to the input directory.
-    """
-    for root, dirs, files in os.walk(directory):
-        if ignore_hidden:
-            dirs[:] = [d for d in dirs if not d.startswith('.')]
-
-        for file in files:
-            if ignore_hidden and file.startswith("."):
-                continue
-            yield os.path.relpath(os.path.join(root, file), directory)
-
-
-def hide_root(text, root) -> str:
-    """
-    Hide all root paths in a text.
-
-    Args:
-    - text (str): The text to replace paths in.
-    - root (str): The root path.
-
-    Returns:
-    - str: The text with all root paths hidden.
-    """
-    # Regular expression pattern to match absolute file paths.
-    # This pattern assumes that paths start with / followed by any non-space characters.
-    text = text.replace(root, "")
-    text = text.replace(root[:-1], ".")
-    return text
-
-
-def get_target_dirs(cmd: list) -> list:
-    """
-    Get the directory of the target file/dir from a command.
-
-    Args:
-    - cmd (list): a single command splitted into a list of arguments.
-
-    Returns:
-    - list: A list of the directories of the target file/dirs.
-            If error occurs, return a list of error messages.
-    """
-    # Get the files
-    files = get_file_names(cmd)
-    target_dirs = []
-
-    for file in files:
-        path = os.path.dirname(file) if "." in os.path.basename(file) else file
-        if path == "":
-            path = "."
-
-        # Backup the cwd
-        original_cwd = os.getcwd()
-
-        try:
-            os.chdir(path)
-        except Exception as e:
-            return ["Error: " + str(e)]
-
-        target_dirs.append(os.getcwd().replace('\\', '/') + "/")
-
-        # Restore the cwd
-        os.chdir(original_cwd)
-
-    return target_dirs
+        logs = logs.replace(self.sandbox_dir, "")
+        return exit_code, logs, image
 
 
 def display_files_recursively(
@@ -566,71 +366,178 @@ def display_files_recursively(
     return ret
 
 
-def find_all_substr(string, substr):
-    """
-    Finds all occurrences of a substring in a string and returns their starting
-    indices.
+def execute_code(
+    code: Optional[str] = None,
+    timeout: Optional[int] = None,
+    filename: Optional[str] = None,
+    work_dir: Optional[str] = None,
+    use_docker: Optional[Union[List[str], str, bool]] = None,
+    lang: Optional[str] = "python",
+) -> Tuple[int, str, str]:
+    if all((code is None, filename is None)):
+        error_msg = f"Either {code=} or {filename=} must be provided."
+        logger.error(error_msg)
+        raise AssertionError(error_msg)
 
-    This function scans the input string for all instances of the specified
-    substring and returns a list of indices where these instances start. If the
-    substring is not found in the string, an empty list is returned.
+    if use_docker and docker is None:
+        error_msg = ("Cannot use docker because the python docker package "
+                     "is not available.")
+        logger.error(error_msg)
+        raise AssertionError(error_msg)
 
-    Args:
-    - string (str): The input string in which to search for the substring.
-    - substr (str): The substring to search for.
+    # Warn if use_docker was unspecified (or None), and cannot be provided
+    # (the default).
+    # In this case the current behavior is to fall back to run natively,
+    # but this behavior
+    # is subject to change.
+    if use_docker is None:
+        if docker is None:
+            use_docker = False
+            logger.warning(
+                "execute_code was called without specifying a value for use_docker. "
+                "Since the python docker package is not available, code will be "
+                "run natively. Note: this fallback behavior is subject to change"
+            )
+        else:
+            # Default to true
+            use_docker = True
 
-    Returns:
-    - list of int: A list of starting indices where the substring is found. The
-         list is empty if the substring is not found.
-    """
-    start_index = 0
-    positions = []
+    timeout = timeout or DEFAULT_TIMEOUT
+    original_filename = filename
+    if WIN32 and lang in ["sh", "shell"] and (not use_docker):
+        lang = "ps1"
+    if filename is None:
+        code_hash = md5(code.encode()).hexdigest()
+        # create a file with a automatically generated name
+        filename = (f".tmp_code_{code_hash}"
+                    f".{'py' if lang.startswith('python') else lang}")
+    if work_dir is None:
+        work_dir = WORKING_DIR
+    filepath = os.path.join(work_dir, filename)
+    file_dir = os.path.dirname(filepath)
+    os.makedirs(file_dir, exist_ok=True)
+    if code is not None:
+        with open(filepath, "w", encoding="utf-8") as fout:
+            fout.write(code)
+    # check if already running in a docker container
+    in_docker_container = os.path.exists("/.dockerenv")
+    if not use_docker or in_docker_container:
+        # already running in a docker container
+        cmd = [
+            sys.executable if lang.startswith("python") else _cmd(lang),
+            f".\\{filename}" if WIN32 else filename,
+        ]
+        if WIN32:
+            logger.warning(
+                "SIGALRM is not supported on Windows. No timeout will be enforced."
+            )
+            result = subprocess.run(
+                cmd,
+                cwd=work_dir,
+                capture_output=True,
+                text=True,
+            )
+        else:
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(
+                    subprocess.run,
+                    cmd,
+                    cwd=work_dir,
+                    capture_output=True,
+                    text=True,
+                )
+                try:
+                    result = future.result(timeout=timeout)
+                except TimeoutError:
+                    if original_filename is None:
+                        os.remove(filepath)
+                    return 1, TIMEOUT_MSG, None
+        if original_filename is None:
+            os.remove(filepath)
+        if result.returncode:
+            logs = result.stderr
+            if original_filename is None:
+                abs_path = str(pathlib.Path(filepath).absolute())
+                logs = logs.replace(str(abs_path), "").replace(filename, "")
+            else:
+                abs_path = str(
+                    pathlib.Path(work_dir).absolute()) + PATH_SEPARATOR
+                logs = logs.replace(str(abs_path), "")
+        else:
+            logs = result.stdout
+        return result.returncode, logs, None
 
-    while True:
-        index = string.find(substr, start_index)
-        if index == -1:
+    # create a docker client
+    client = docker.from_env()
+    image_list = ([
+        "python:3-alpine", "python:3", "python:3-windowsservercore"
+    ] if use_docker is True else
+                  [use_docker] if isinstance(use_docker, str) else use_docker)
+    for image in image_list:
+        # check if the image exists
+        try:
+            client.images.get(image)
             break
-        positions.append(index)
-        start_index = index + 1
+        except docker.errors.ImageNotFound:
+            # pull the image
+            print("Pulling image", image)
+            try:
+                client.images.pull(image)
+                break
+            except docker.errors.DockerException:
+                print("Failed to pull image", image)
+    # get a randomized str based on current time to wrap the exit code
+    exit_code_str = f"exitcode{time.time()}"
+    abs_path = pathlib.Path(work_dir).absolute()
+    cmd = [
+        "sh",
+        "-c",
+        f"{_cmd(lang)} {filename}; exit_code=$?; echo -n {exit_code_str}; "
+        f"echo -n $exit_code; echo {exit_code_str}",
+    ]
+    # create a docker container
+    container = client.containers.run(
+        image,
+        command=cmd,
+        working_dir="/workspace",
+        detach=True,
+        # get absolute path to the working directory
+        volumes={abs_path: {
+            "bind": "/workspace",
+            "mode": "rw"
+        }},
+    )
+    start_time = time.time()
+    while container.status != "exited" and time.time() - start_time < timeout:
+        # Reload the container object
+        container.reload()
+    if container.status != "exited":
+        container.stop()
+        container.remove()
+        if original_filename is None:
+            os.remove(filepath)
+        return 1, TIMEOUT_MSG, image
+    # get the container logs
+    logs = container.logs().decode("utf-8").rstrip()
+    # commit the image
+    tag = filename.replace("/", "")
+    container.commit(repository="python", tag=tag)
+    # remove the container
+    container.remove()
+    # check if the code executed successfully
+    exit_code = container.attrs["State"]["ExitCode"]
+    if exit_code == 0:
+        # extract the exit code from the logs
+        pattern = re.compile(f"{exit_code_str}(\\d+){exit_code_str}")
+        match = pattern.search(logs)
+        exit_code = 1 if match is None else int(match.group(1))
+        # remove the exit code from the logs
+        logs = logs if match is None else pattern.sub("", logs)
 
-    return positions
-
-
-def get_file_names(command: list) -> list:
-    """
-    Extract file names from the command.
-
-    Args:
-    - command (list): The command splitted into a list.
-
-    Returns:
-    - list: A list of file names.
-    """
-    if command[0] == "ls":
-        if len(command) > 1:
-            return [command[1]]
-        else:
-            return ["."]
-    elif command[0] == "cat":
-        ret = [command[1]]
-        if ">" in command or ">>" in command:
-            ret.append(command[-1])
-        return ret
-    elif command[0] == "head":
-        return [command[3]]
-    elif command[0] == "cd":
-        return [command[1]]
-    elif command[0] == "echo":
-        return [command[-1]]
-    elif command[0] == "python":
-        if command[2] == "-c":
-            return ["."]
-        else:
-            for x in command:
-                if x.endswith(".py"):
-                    return [x]
-    elif command[0] == "pip":
-        return ["."]
-    else:
-        raise NotImplementedError(f"Does not support command: {command[0]}")
-        raise NotImplementedError(f"Does not support command: {command[0]}")
+    if original_filename is None:
+        os.remove(filepath)
+    if exit_code:
+        logs = logs.replace(
+            f"/workspace/{filename if original_filename is None else ''}", "")
+    # return the exit code, logs and image
+    return exit_code, logs, f"python:{tag}"

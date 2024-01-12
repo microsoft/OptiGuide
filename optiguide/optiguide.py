@@ -15,9 +15,17 @@ from autogen.agentchat import AssistantAgent
 from autogen.agentchat.agent import Agent
 from autogen.code_utils import extract_code
 from eventlet.timeout import Timeout
-# from gurobipy import GRB
-from pyomo.opt import TerminationCondition
 from termcolor import colored
+
+try:
+    from gurobipy import GRB
+except Exception:
+    print("Note: Gurobi not loaded")
+
+try:
+    from pyomo.opt import TerminationCondition
+except Exception:
+    print("Note: Pyomo not loaded")
 
 # %% System Messages
 WRITER_SYSTEM_MSG = """You are a chatbot to:
@@ -76,6 +84,7 @@ class OptiGuideAgent(AssistantAgent):
     def __init__(self,
                  name,
                  source_code,
+                 solver_software="gurobi",
                  doc_str="",
                  example_qa="",
                  debug_times=3,
@@ -100,7 +109,12 @@ class OptiGuideAgent(AssistantAgent):
         self._source_code = source_code
         self._doc_str = doc_str
         self._example_qa = example_qa
-        self._origin_execution_result = _run_with_exec(source_code)
+        assert solver_software in ["gurobi",
+                                   "pyomo"], "Unknown solver software."
+
+        self._solver_software = solver_software
+        self._origin_execution_result = _run_with_exec(source_code,
+                                                       self._solver_software)
         self._writer = AssistantAgent("writer", llm_config=self.llm_config)
         self._safeguard = AssistantAgent("safeguard",
                                          llm_config=self.llm_config)
@@ -161,7 +175,7 @@ class OptiGuideAgent(AssistantAgent):
         if safe_msg.find("DANGER") < 0:
             # Step 4 and 5: Run the code and obtain the results
             src_code = _insert_code(self._source_code, code)
-            execution_rst = _run_with_exec(src_code)
+            execution_rst = _run_with_exec(src_code, self._solver_software)
             print(colored(str(execution_rst), "yellow"))
             if type(execution_rst) in [str, int, float]:
                 # we successfully run the code and get the result
@@ -187,7 +201,8 @@ Please try to find a new way (coding) to answer the question."""
 # This approach replicate the evaluation section of the OptiGuide paper.
 
 
-def _run_with_exec(src_code: str) -> Union[str, Exception]:
+def _run_with_exec(src_code: str,
+                   solver_software: str) -> Union[str, Exception]:
     """Run the code snippet with exec.
 
     Args:
@@ -214,26 +229,7 @@ def _run_with_exec(src_code: str) -> Union[str, Exception]:
         timeout.cancel()
 
     try:
-        # status = locals_dict["m"].Status
-        status = locals_dict["m"].solver.termination_condition
-        if status != TerminationCondition.optimal:
-            if status == TerminationCondition.unbounded:
-                ans = "unbounded"
-            elif status == TerminationCondition.infeasibleOrUnbounded:
-                ans = "inf_or_unbound"
-            elif status == TerminationCondition.infeasible:
-                ans = "infeasible"
-                # m = locals_dict["m"]
-                # m.computeIIS()
-                # constrs = [c.ConstrName for c in m.getConstrs() if c.IISConstr]
-                # ans += "\nConflicting Constraints:\n" + str(constrs)
-            else:
-                ans = "Model Status:" + str(status)
-        else:
-            # ans = "Optimization problem solved. The objective value is: " + str(
-            #     locals_dict["m"].objVal)
-            ans = "Optimization problem solved. The objective value is: " + str(
-                locals_dict["model"].obj())
+        ans = _get_optimization_result(locals_dict, solver_software)
     except Exception as e:
         return e
 
@@ -291,6 +287,45 @@ def _insert_code(src_code: str, new_lines: str) -> str:
         return _replace(src_code, CONSTRAINT_CODE_STR, new_lines)
     else:
         return _replace(src_code, DATA_CODE_STR, new_lines)
+
+
+def _get_optimization_result(locals_dict: dict, solver_software: str) -> str:
+    if solver_software == "gurobi":
+        status = locals_dict["m"].Status
+        if status != GRB.OPTIMAL:
+            if status == GRB.UNBOUNDED:
+                ans = "unbounded"
+            elif status == GRB.INF_OR_UNBD:
+                ans = "inf_or_unbound"
+            elif status == GRB.INFEASIBLE:
+                ans = "infeasible"
+                m = locals_dict["m"]
+                m.computeIIS()
+                constrs = [c.ConstrName for c in m.getConstrs() if c.IISConstr]
+                ans += "\nConflicting Constraints:\n" + str(constrs)
+            else:
+                ans = "Model Status:" + str(status)
+        else:
+            ans = "Optimization problem solved. The objective value is: " + str(
+                locals_dict["m"].objVal)
+    elif solver_software == "pyomo":
+        status = locals_dict["m"].solver.termination_condition
+        if status != TerminationCondition.optimal:
+            if status == TerminationCondition.unbounded:
+                ans = "unbounded"
+            elif status == TerminationCondition.infeasibleOrUnbounded:
+                ans = "inf_or_unbound"
+            elif status == TerminationCondition.infeasible:
+                ans = "infeasible"
+            else:
+                ans = "Model Status:" + str(status)
+        else:
+            ans = "Optimization problem solved. The objective value is: " + str(
+                locals_dict["model"].obj())
+    else:
+        raise ValueError("Unknown solver software: " + solver_software)
+
+    return ans
 
 
 # %% Prompt for OptiGuide

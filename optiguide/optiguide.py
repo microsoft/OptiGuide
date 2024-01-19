@@ -31,7 +31,7 @@ except Exception:
 WRITER_SYSTEM_MSG = """You are a chatbot to:
 (1) write Python code to answer users questions for supply chain-related coding
 project;
-(2) explain solutions from a Gurobi/Python solver.
+(2) explain solutions from a {solver_software} Python solver.
 
 --- SOURCE CODE ---
 {source_code}
@@ -62,8 +62,8 @@ SAFEGUARD_SYSTEM_MSG = """
 Given the original source code:
 {source_code}
 
-Is the following code safe (not malicious code to break security
-and privacy) to run?
+Is the following code safe (not malicious code to break security,
+privacy, or hack the system) to run?
 Answer only one word.
 If not safe, answer `DANGER`; else, answer `SAFE`.
 """
@@ -88,6 +88,7 @@ class OptiGuideAgent(AssistantAgent):
                  doc_str="",
                  example_qa="",
                  debug_times=3,
+                 use_safeguard=True,
                  **kwargs):
         """
         Args:
@@ -119,6 +120,7 @@ class OptiGuideAgent(AssistantAgent):
         self._safeguard = AssistantAgent("safeguard",
                                          llm_config=self.llm_config)
         self._debug_times_left = self.debug_times = debug_times
+        self._use_safeguard = use_safeguard
         self._success = False
 
     def generate_reply(
@@ -136,6 +138,7 @@ class OptiGuideAgent(AssistantAgent):
             user_chat_history = ("\nHere are the history of discussions:\n"
                                  f"{self._oai_messages[sender]}")
             writer_sys_msg = (WRITER_SYSTEM_MSG.format(
+                solver_software=self._solver_software,
                 source_code=self._source_code,
                 doc_str=self._doc_str,
                 example_qa=self._example_qa,
@@ -167,14 +170,22 @@ class OptiGuideAgent(AssistantAgent):
         if self._success:
             # no reply to writer
             return
-        # Step 3: safeguard
+
         _, code = extract_code(self.last_message(sender)["content"])[0]
-        self.initiate_chat(message=SAFEGUARD_PROMPT.format(code=code),
-                           recipient=self._safeguard)
-        safe_msg = self.last_message(self._safeguard)["content"]
+
+        # Step 3: safeguard
+        safe_msg = ""
+        if self._use_safeguard:
+            self.initiate_chat(message=SAFEGUARD_PROMPT.format(code=code),
+                               recipient=self._safeguard)
+            safe_msg = self.last_message(self._safeguard)["content"]
+        else:
+            safe_msg = "SAFE"
+
         if safe_msg.find("DANGER") < 0:
             # Step 4 and 5: Run the code and obtain the results
-            src_code = _insert_code(self._source_code, code)
+            src_code = _insert_code(self._source_code, code,
+                                    self._solver_software)
             execution_rst = _run_with_exec(src_code, self._solver_software)
             print(colored(str(execution_rst), "yellow"))
             if type(execution_rst) in [str, int, float]:
@@ -272,7 +283,7 @@ def _replace(src_code: str, old_code: str, new_code: str) -> str:
     return rst
 
 
-def _insert_code(src_code: str, new_lines: str) -> str:
+def _insert_code(src_code: str, new_lines: str, solver_software: str) -> str:
     """insert a code patch into the source code.
 
 
@@ -283,10 +294,14 @@ def _insert_code(src_code: str, new_lines: str) -> str:
     Returns:
         str: the full source code after insertion (replacement).
     """
-    if new_lines.find("addConstr") >= 0:
-        return _replace(src_code, CONSTRAINT_CODE_STR, new_lines)
-    else:
-        return _replace(src_code, DATA_CODE_STR, new_lines)
+    if solver_software == "gurobi":
+        if new_lines.find("addConstr") >= 0:
+            return _replace(src_code, CONSTRAINT_CODE_STR, new_lines)
+    elif solver_software == "pyomo":
+        if new_lines.find("Constraint") >= 0:
+            return _replace(src_code, CONSTRAINT_CODE_STR, new_lines)
+
+    return _replace(src_code, DATA_CODE_STR, new_lines)
 
 
 def _get_optimization_result(locals_dict: dict, solver_software: str) -> str:

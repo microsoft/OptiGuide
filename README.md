@@ -38,7 +38,7 @@ Here is the [Pypi page](https://pypi.org/project/OptiGuide/) for more informatio
           "model": "gpt-4",
           "api_key": "Your API Key Comes Here",
           "api_type": "azure",
-          "api_base": "The API base URL",
+          "base_url": "The API base URL",
           "api_version": "2023-03-15-preview"
       }
   ]
@@ -56,7 +56,7 @@ Here is the [Pypi page](https://pypi.org/project/OptiGuide/) for more informatio
           "model": "gpt-4",
           "api_key": "Your API Key Comes Here",
           "api_type": "azure",
-          "api_base": "The API base URL",
+          "base_url": "The API base URL",
           "api_version": "2023-03-15-preview"
       }
   ]

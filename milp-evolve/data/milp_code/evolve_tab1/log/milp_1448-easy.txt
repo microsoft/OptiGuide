@@ -1,0 +1,41 @@
+presolving:
+(round 1, fast)       770 del vars, 163 del conss, 0 add conss, 6525 chg bounds, 0 chg sides, 6525 chg coeffs, 0 upgd conss, 0 impls, 1 clqs
+   (0.1s) running MILP presolver
+   (0.2s) MILP presolver (2 rounds): 0 aggregations, 0 fixings, 0 bound changes
+(round 2, medium)     770 del vars, 6839 del conss, 6602 add conss, 6525 chg bounds, 0 chg sides, 6525 chg coeffs, 0 upgd conss, 0 impls, 1 clqs
+(round 3, exhaustive) 770 del vars, 6839 del conss, 6602 add conss, 6525 chg bounds, 0 chg sides, 6525 chg coeffs, 6527 upgd conss, 0 impls, 1 clqs
+   (0.4s) probing cycle finished: starting next cycle
+   (0.5s) symmetry computation started: requiring (bin +, int -, cont +), (fixed: bin -, int +, cont -)
+   (0.5s) no symmetry present
+presolving (4 rounds: 4 fast, 3 medium, 2 exhaustive):
+ 770 deleted vars, 6839 deleted constraints, 6602 added constraints, 6525 tightened bounds, 0 added holes, 0 changed sides, 6525 changed coefficients
+ 14775 implications, 1 cliques
+presolved problem has 6612 variables (87 bin, 0 int, 0 impl, 6525 cont) and 6602 constraints
+   6525 constraints of type <varbound>
+      1 constraints of type <setppc>
+     75 constraints of type <linear>
+      1 constraints of type <logicor>
+Presolving Time: 0.45
+
+ time | node  | left  |LP iter|LP it/n|mem/heur|mdpt |vars |cons |rows |cuts |sepa|confs|strbr|  dualbound   | primalbound  |  gap   | compl. 
+p 0.6s|     1 |     0 |    75 |     - |   locks|   0 |6612 |6602 |6602 |   0 |  0 |   0 |   0 | 0.000000e+00 | 4.535340e+05 |    Inf | unknown
+i 0.6s|     1 |     0 |    75 |     - |  oneopt|   0 |6612 |6602 |6602 |   0 |  0 |   0 |   0 | 0.000000e+00 | 3.905340e+05 |    Inf | unknown
+  1.2s|     1 |     0 |  2389 |     - |    75M |   0 |6612 |6602 |6602 |   0 |  0 |   0 |   0 | 2.737187e+05 | 3.905340e+05 |  42.68%| unknown
+r 1.2s|     1 |     0 |  2389 |     - |shifting|   0 |6612 |6602 |6602 |   0 |  0 |   0 |   0 | 2.737187e+05 | 3.338593e+05 |  21.97%| unknown
+r 1.4s|     1 |     0 |  2804 |     - |intshift|   0 |6612 |6602 |6602 |   0 |  2 |   0 |   0 | 2.737187e+05 | 3.164580e+05 |  15.61%| unknown
+o 1.5s|     1 |     0 |  3428 |     - |feaspump|   0 |6612 |6602 |6602 |   0 |  2 |   0 |   0 | 2.737187e+05 | 3.140120e+05 |  14.72%| unknown
+L 2.9s|     1 |     0 |  3428 |     - |    rens|   0 |6612 |6602 |6602 |   0 |  2 |   0 |   0 | 2.737187e+05 | 2.765500e+05 |   1.03%| unknown
+  3.1s|     1 |     0 |  3428 |     - |    78M |   0 |6612 |6602 |6602 |   0 |  2 |   0 |   0 | 2.737187e+05 | 2.765500e+05 |   1.03%| unknown
+  3.1s|     1 |     0 |  3428 |     - |    78M |   0 |6612 |6602 |6602 |   0 |  2 |   0 |   0 | 2.737187e+05 | 2.765500e+05 |   1.03%| unknown
+  3.2s|     1 |     0 |  3428 |     - |    78M |   0 |6612 |6602 |6456 |   0 |  3 |   0 |   0 | 2.737187e+05 | 2.765500e+05 |   1.03%| unknown
+  7.5s|     1 |     2 |  3428 |     - |    78M |   0 |6612 |6452 |6456 |   0 |  4 |   0 |  29 | 2.744318e+05 | 2.765500e+05 |   0.77%| unknown
+
+SCIP Status        : problem is solved [optimal solution found]
+Solving Time (sec) : 21.16
+Solving Nodes      : 37
+Primal Bound       : +2.76550000000000e+05 (65 solutions)
+Dual Bound         : +2.76550000000000e+05
+Gap                : 0.00 %
+Solve Status: optimal
+Solve Time: 21.17 seconds
+Objective Value: 276550.00

@@ -1,0 +1,47 @@
+feasible solution found by trivial heuristic after 0.2 seconds, objective value 1.396811e+06
+presolving:
+(round 1, fast)       0 del vars, 0 del conss, 0 add conss, 0 chg bounds, 0 chg sides, 61012 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+   (0.7s) running MILP presolver
+   (0.9s) MILP presolver (2 rounds): 0 aggregations, 0 fixings, 0 bound changes
+(round 2, medium)     0 del vars, 1400 del conss, 375 add conss, 0 chg bounds, 0 chg sides, 61012 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 3, exhaustive) 0 del vars, 1400 del conss, 375 add conss, 0 chg bounds, 0 chg sides, 61012 chg coeffs, 375 upgd conss, 0 impls, 0 clqs
+(round 4, fast)       0 del vars, 1400 del conss, 375 add conss, 0 chg bounds, 373 chg sides, 103126 chg coeffs, 375 upgd conss, 0 impls, 0 clqs
+(round 5, exhaustive) 1 del vars, 1400 del conss, 375 add conss, 0 chg bounds, 373 chg sides, 103126 chg coeffs, 375 upgd conss, 0 impls, 0 clqs
+(round 6, fast)       1 del vars, 1400 del conss, 375 add conss, 0 chg bounds, 746 chg sides, 214741 chg coeffs, 375 upgd conss, 0 impls, 0 clqs
+   (5.0s) probing: 51/699 (7.3%) - 0 fixings, 0 aggregations, 0 implications, 0 bound changes
+   (5.0s) probing aborted: 50/50 successive totally useless probings
+   (5.2s) symmetry computation started: requiring (bin +, int -, cont +), (fixed: bin -, int +, cont -)
+   (5.3s) no symmetry present
+presolving (7 rounds: 7 fast, 4 medium, 3 exhaustive):
+ 1 deleted vars, 1400 deleted constraints, 375 added constraints, 0 tightened bounds, 0 added holes, 746 changed sides, 214741 changed coefficients
+ 0 implications, 0 cliques
+presolved problem has 699 variables (699 bin, 0 int, 0 impl, 0 cont) and 375 constraints
+    374 constraints of type <knapsack>
+      1 constraints of type <logicor>
+transformed objective value is always integral (scale: 1)
+Presolving Time: 5.23
+transformed 1/2 original solutions to the transformed problem space
+
+ time | node  | left  |LP iter|LP it/n|mem/heur|mdpt |vars |cons |rows |cuts |sepa|confs|strbr|  dualbound   | primalbound  |  gap   | compl. 
+p 5.5s|     1 |     0 |     0 |     - |   locks|   0 | 699 | 375 | 375 |   0 |  0 |   0 |   0 | 0.000000e+00 | 6.816000e+03 |    Inf | unknown
+i 5.5s|     1 |     0 |     0 |     - |  oneopt|   0 | 699 | 375 | 375 |   0 |  0 |   0 |   0 | 0.000000e+00 | 5.161000e+03 |    Inf | unknown
+  5.5s|     1 |     0 |     3 |     - |   337M |   0 | 699 | 375 | 375 |   0 |  0 |   0 |   0 | 2.950941e+02 | 5.161000e+03 |1648.93%| unknown
+r 5.5s|     1 |     0 |     3 |     - |simplero|   0 | 699 | 375 | 375 |   0 |  0 |   0 |   0 | 2.950941e+02 | 4.870000e+02 |  65.03%| unknown
+r 5.5s|     1 |     0 |     3 |     - |shifting|   0 | 699 | 375 | 375 |   0 |  0 |   0 |   0 | 2.950941e+02 | 3.870000e+02 |  31.14%| unknown
+  5.8s|     1 |     0 |     4 |     - |   340M |   0 | 699 | 375 | 376 |   1 |  1 |   0 |   0 | 3.065891e+02 | 3.870000e+02 |  26.23%| unknown
+  5.8s|     1 |     0 |     4 |     - |   340M |   0 | 699 | 375 | 376 |   1 |  1 |   0 |   0 | 3.065891e+02 | 3.870000e+02 |  26.23%| unknown
+  5.8s|     1 |     0 |     4 |     - |   340M |   0 | 699 | 375 | 159 |   1 |  1 |   0 |   0 | 3.065891e+02 | 3.870000e+02 |  26.23%| unknown
+ 15.2s|     1 |     0 |     5 |     - |   340M |   0 | 699 | 374 | 161 |   3 |  2 |   0 |   0 | 3.118405e+02 | 3.870000e+02 |  24.10%| unknown
+r15.2s|     1 |     0 |     5 |     - |rounding|   0 | 699 | 374 | 161 |   3 |  2 |   0 |   0 | 3.118405e+02 | 3.410000e+02 |   9.35%| unknown
+ 24.6s|     1 |     0 |     7 |     - |   341M |   0 | 699 | 374 | 162 |   5 |  3 |   0 |   0 | 3.205991e+02 | 3.410000e+02 |   6.36%| unknown
+ 31.2s|     1 |     0 |     8 |     - |   341M |   0 | 699 | 374 | 164 |   7 |  4 |   0 |   0 | 3.410000e+02 | 3.410000e+02 |   0.00%| unknown
+ 31.2s|     1 |     0 |     8 |     - |   341M |   0 | 699 | 374 | 164 |   7 |  4 |   0 |   0 | 3.410000e+02 | 3.410000e+02 |   0.00%| unknown
+
+SCIP Status        : problem is solved [optimal solution found]
+Solving Time (sec) : 31.16
+Solving Nodes      : 1
+Primal Bound       : +3.41000000000000e+02 (13 solutions)
+Dual Bound         : +3.41000000000000e+02
+Gap                : 0.00 %
+Solve Status: optimal
+Solve Time: 31.17 seconds

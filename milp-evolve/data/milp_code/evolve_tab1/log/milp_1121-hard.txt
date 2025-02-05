@@ -1,0 +1,42 @@
+presolving:
+(round 1, fast)       60 del vars, 0 del conss, 0 add conss, 54060 chg bounds, 0 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 2, fast)       60 del vars, 0 del conss, 0 add conss, 54060 chg bounds, 60 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 3, fast)       18060 del vars, 18020 del conss, 0 add conss, 54060 chg bounds, 60 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 4, fast)       18060 del vars, 18020 del conss, 0 add conss, 90060 chg bounds, 60 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 5, fast)       18060 del vars, 18020 del conss, 0 add conss, 90060 chg bounds, 60 chg sides, 40500 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+   (1.6s) running MILP presolver
+   (1.9s) MILP presolver found nothing
+(round 6, exhaustive) 18060 del vars, 18020 del conss, 0 add conss, 90060 chg bounds, 60 chg sides, 40500 chg coeffs, 36000 upgd conss, 0 impls, 0 clqs
+   (3.1s) probing: 51/900 (5.7%) - 0 fixings, 0 aggregations, 0 implications, 0 bound changes
+   (3.1s) probing aborted: 50/50 successive totally useless probings
+   (3.3s) symmetry computation started: requiring (bin +, int -, cont +), (fixed: bin -, int +, cont -)
+   (3.6s) no symmetry present
+presolving (7 rounds: 7 fast, 2 medium, 2 exhaustive):
+ 18060 deleted vars, 18020 deleted constraints, 0 added constraints, 90060 tightened bounds, 0 added holes, 60 changed sides, 40500 changed coefficients
+ 36000 implications, 0 cliques
+presolved problem has 36900 variables (900 bin, 0 int, 0 impl, 36000 cont) and 40545 constraints
+  36000 constraints of type <varbound>
+   4545 constraints of type <linear>
+Presolving Time: 3.34
+
+ time | node  | left  |LP iter|LP it/n|mem/heur|mdpt |vars |cons |rows |cuts |sepa|confs|strbr|  dualbound   | primalbound  |  gap   | compl. 
+p 4.2s|     1 |     0 |     5 |     - |   locks|   0 |  36k|  40k|  40k|   0 |  0 |   0 |   0 | 6.951515e+06 | 1.375715e+07 |  97.90%| unknown
+i 4.2s|     1 |     0 |     5 |     - |  oneopt|   0 |  36k|  40k|  40k|   0 |  0 |   0 |   0 | 6.951515e+06 | 6.976253e+06 |   0.36%| unknown
+ 57.9s|     1 |     0 | 16867 |     - |   346M |   0 |  36k|  40k|  40k|   0 |  0 |   0 |   0 | 6.954559e+06 | 6.976253e+06 |   0.31%| unknown
+r57.9s|     1 |     0 | 16867 |     - |simplero|   0 |  36k|  40k|  40k|   0 |  0 |   0 |   0 | 6.954559e+06 | 6.969366e+06 |   0.21%| unknown
+ 99.5s|     1 |     0 | 31476 |     - |   361M |   0 |  36k|  40k|  40k|   3 |  1 |   0 |   0 | 6.958217e+06 | 6.969366e+06 |   0.16%| unknown
+r99.6s|     1 |     0 | 31476 |     - |simplero|   0 |  36k|  40k|  40k|   3 |  1 |   0 |   0 | 6.958217e+06 | 6.963240e+06 |   0.07%| unknown
+  100s|     1 |     0 | 31476 |     - |   367M |   0 |  36k|  40k|  40k|   3 |  3 |   0 |   0 | 6.958217e+06 | 6.963240e+06 |   0.07%| unknown
+  101s|     1 |     0 | 31600 |     - |   367M |   0 |  36k|  40k|  40k|   4 |  4 |   0 |   0 | 6.958226e+06 | 6.963240e+06 |   0.07%| unknown
+d 101s|     1 |     0 | 31600 |     - |farkasdi|   0 |  36k|  40k|  40k|   0 |  6 |   0 |   0 | 6.958226e+06 | 6.958226e+06 |   0.00%| unknown
+  101s|     1 |     0 | 31600 |     - |   368M |   0 |  36k|  40k|  40k|   4 |  6 |   0 |   0 | 6.958226e+06 | 6.958226e+06 |   0.00%| unknown
+
+SCIP Status        : problem is solved [optimal solution found]
+Solving Time (sec) : 100.91
+Solving Nodes      : 1
+Primal Bound       : +6.95822556671415e+06 (5 solutions)
+Dual Bound         : +6.95822556671415e+06
+Gap                : 0.00 %
+Solve Status: optimal
+Solve Time: 100.97 seconds
+Objective Value: 6958225.57

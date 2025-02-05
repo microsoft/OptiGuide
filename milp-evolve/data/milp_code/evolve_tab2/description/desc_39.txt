@@ -1,0 +1,5 @@
+This optimization model focuses on scheduling a set of jobs across multiple machines while satisfying precedence, affinity, and conflict constraints. Each job has a designated machine, a processing time, and an affinity value that reflects its priority. 
+The model enforces sequencing constraints, ensuring that jobs on the same machine do not overlap, while also maintaining predefined precedence relationships among jobs within different groups. 
+Additionally, machine-specific conflict constraints require certain pairs of jobs assigned to the same machine to execute in sequence, modeled through a conflict graph. 
+The objective is to minimize the overall makespan, reduced by the sum of job affinities, while also accounting for penalties related to uncovered job groups (sets of jobs that should ideally include at least one scheduled job). 
+These penalties are intended to encourage coverage of specific job groups, modeled through a set covering constraint, and the optimization balances the overall schedule’s efficiency with the associated penalty costs for any groups left uncovered.

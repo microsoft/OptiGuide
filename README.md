@@ -1,8 +1,14 @@
 # OptiGuide: GenAI for Decision Intelligence and Optimization
 
 
-## Citation
-Please cite the paper if you use this code in your own work:
+## Projects
+
+We have several projects in this repository for decision making and optimization, and please cite the paper if you use this code in your own work.
+
+
+### OptiGuide for Supply Chain Optimization with What-if Analysis
+The [what-if](what-if/) folder includes the following material to open source the paper and what-if analysis for the OptiGuide project:
+
 ```latex
 @article{li2023large,
   title={Large Language Models for Supply Chain Optimization},
@@ -12,6 +18,17 @@ Please cite the paper if you use this code in your own work:
 }
 ```
 
+### Towards Foundation Models for Mixed Integer Linear Programming
+The [milp-evolve](milp-evolve/) folder includes the following material to open source the paper, MILP-Evolve code, and data:
+
+```latex
+@article{li2024towards,
+  author    = {Li, Sirui and Kulkarni, Janardhan and Wu, Cathy and Menache, Ishai and Li, Beibin},
+  title     = {Towards Foundation Models for Mixed Integer Linear Programming},
+  booktitle = {The Thirteenth International Conference on Learning Representations},
+  year      = {2025}
+}
+```
 
 
 ## Responsible AI Considerations  

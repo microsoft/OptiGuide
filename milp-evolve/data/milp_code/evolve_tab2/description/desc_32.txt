@@ -1,0 +1,7 @@
+This model tackles a robust job scheduling problem where jobs must be assigned to machines, 
+respecting precedence and timing constraints, while also accounting for uncertainty in processing times and tariff impacts. 
+Each job has a stochastic processing time based on a mean and variance, and tariff impacts introduce additional risk-related costs, 
+scaled by a risk weight parameter. The model enforces precedence constraints within dynamically generated job groups and ensures that jobs assigned to the same machine are properly sequenced to avoid overlap. 
+A large constant M is used to impose these sequencing constraints on binary variables indicating the job order. 
+The objective is to minimize the makespan (total schedule duration) and total risk cost. 
+The model includes flexibility for randomness, precedence grouping, and the assignment of jobs to machines, aiming for an optimal job schedule under uncertainty.

@@ -13,18 +13,18 @@ install_requires = [
     "gurobipy"
 ]
 
-__version__ = re.findall("\"(.+)\"", open("optiguide/version.py").read())[0]
+__version__ = re.findall("\"(.+)\"", open("what-if/optiguide/version.py").read())[0]
 
 setuptools.setup(
     name="OptiGuide",
     version=__version__,
     author="Beibin Li",
     author_email="beibin.li@microsoft.com",
-    description="Large Language Models for Supply Chain Optimization",
+    description="GenAI for Decision Making and Optimization",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/microsoft/optiguide",
-    packages=setuptools.find_packages(include=["optiguide*"]),
+    packages=setuptools.find_packages(include=["what-if/optiguide*"]),
     package_data={
         "optiguide.default": ["*/*.json"],
     },

@@ -1,0 +1,71 @@
+presolving:
+(round 1, fast)       50 del vars, 50 del conss, 0 add conss, 16200 chg bounds, 0 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 2, fast)       50 del vars, 50 del conss, 0 add conss, 32400 chg bounds, 0 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 3, fast)       50 del vars, 50 del conss, 0 add conss, 32400 chg bounds, 0 chg sides, 16534 chg coeffs, 0 upgd conss, 0 impls, 1080 clqs
+   (0.2s) running MILP presolver
+   (0.2s) MILP presolver found nothing
+(round 4, exhaustive) 50 del vars, 50 del conss, 0 add conss, 32400 chg bounds, 0 chg sides, 16534 chg coeffs, 16203 upgd conss, 0 impls, 1080 clqs
+   (0.4s) probing: 51/1440 (3.5%) - 0 fixings, 0 aggregations, 0 implications, 0 bound changes
+   (0.4s) probing aborted: 50/50 successive totally useless probings
+   (0.4s) symmetry computation started: requiring (bin +, int -, cont +), (fixed: bin -, int +, cont -)
+   (0.4s) no symmetry present
+   (0.4s) symmetry computation started: requiring (bin +, int +, cont +), (fixed: bin -, int -, cont -)
+   (0.5s) no symmetry present
+presolving (5 rounds: 5 fast, 2 medium, 2 exhaustive):
+ 50 deleted vars, 50 deleted constraints, 0 added constraints, 32400 tightened bounds, 0 added holes, 0 changed sides, 16534 changed coefficients
+ 15120 implications, 1080 cliques
+presolved problem has 16560 variables (1440 bin, 15120 int, 0 impl, 0 cont) and 16605 constraints
+  15120 constraints of type <varbound>
+   1080 constraints of type <setppc>
+    402 constraints of type <linear>
+      3 constraints of type <logicor>
+Presolving Time: 0.45
+
+ time | node  | left  |LP iter|LP it/n|mem/heur|mdpt |vars |cons |rows |cuts |sepa|confs|strbr|  dualbound   | primalbound  |  gap   | compl. 
+p 0.6s|     1 |     0 |     0 |     - |  clique|   0 |  16k|  16k|  16k|   0 |  0 |   0 |   0 | 0.000000e+00 | 5.505439e+05 |    Inf | unknown
+  1.5s|     1 |     0 |  2684 |     - |   133M |   0 |  16k|  16k|  16k|   0 |  0 |   0 |   0 | 1.893182e+05 | 5.505439e+05 | 190.80%| unknown
+r 1.5s|     1 |     0 |  2684 |     - |rounding|   0 |  16k|  16k|  16k|   0 |  0 |   0 |   0 | 1.893182e+05 | 2.672644e+05 |  41.17%| unknown
+i 1.5s|     1 |     0 |  2684 |     - |  oneopt|   0 |  16k|  16k|  16k|   0 |  0 |   0 |   0 | 1.893182e+05 | 2.636194e+05 |  39.25%| unknown
+  2.1s|     1 |     0 |  2685 |     - |   141M |   0 |  16k|  16k|  16k|   1 |  1 |   0 |   0 | 1.893183e+05 | 2.636194e+05 |  39.25%| unknown
+d10.1s|     1 |     0 | 14609 |     - |farkasdi|   0 |  16k|  16k|  16k|   0 |  3 |   0 |   0 | 1.893183e+05 | 2.010641e+05 |   6.20%| unknown
+o10.3s|     1 |     0 | 15804 |     - |feaspump|   0 |  16k|  16k|  16k|   1 |  3 |   0 |   0 | 1.893183e+05 | 1.924226e+05 |   1.64%| unknown
+ 10.5s|     1 |     0 | 15804 |     - |   146M |   0 |  16k|  16k|  16k|   1 |  3 |   0 |   0 | 1.893183e+05 | 1.924226e+05 |   1.64%| unknown
+ 10.6s|     1 |     0 | 15804 |     - |   147M |   0 |  16k|  16k|  16k|   1 |  3 |   0 |   0 | 1.893183e+05 | 1.924226e+05 |   1.64%| unknown
+ 11.0s|     1 |     0 | 15804 |     - |   152M |   0 |  16k|  16k|  12k|   1 |  4 |   0 |   0 | 1.893183e+05 | 1.924226e+05 |   1.64%| unknown
+(run 1, node 1) restarting after 4440 global fixings of integer variables
+
+(restart) converted 1 cuts from the global cut pool into linear constraints
+
+presolving:
+(round 1, fast)       4440 del vars, 0 del conss, 0 add conss, 0 chg bounds, 0 chg sides, 8356 chg coeffs, 0 upgd conss, 15120 impls, 725 clqs
+   (11.1s) running MILP presolver
+   (11.1s) MILP presolver found nothing
+presolving (2 rounds: 2 fast, 1 medium, 1 exhaustive):
+ 4440 deleted vars, 0 deleted constraints, 0 added constraints, 0 tightened bounds, 0 added holes, 0 changed sides, 8356 changed coefficients
+ 15120 implications, 725 cliques
+presolved problem has 12120 variables (990 bin, 11130 int, 0 impl, 0 cont) and 12166 constraints
+  11130 constraints of type <varbound>
+    725 constraints of type <setppc>
+    308 constraints of type <linear>
+      3 constraints of type <logicor>
+Presolving Time: 0.55
+transformed 6/7 original solutions to the transformed problem space
+
+ time | node  | left  |LP iter|LP it/n|mem/heur|mdpt |vars |cons |rows |cuts |sepa|confs|strbr|  dualbound   | primalbound  |  gap   | compl. 
+ 11.6s|     1 |     0 | 17595 |     - |   153M |   0 |  12k|  12k|  12k|   0 |  0 |   0 |   0 | 1.893183e+05 | 1.924226e+05 |   1.64%| unknown
+ 11.6s|     1 |     0 | 17595 |     - |   153M |   0 |  12k|  12k|  12k|   0 |  0 |   0 |   0 | 1.893183e+05 | 1.924226e+05 |   1.64%| unknown
+ 11.9s|     1 |     0 | 17595 |     - |   155M |   0 |  12k|  12k|  12k|   0 |  1 |   0 |   0 | 1.893183e+05 | 1.924226e+05 |   1.64%| unknown
+ 18.5s|     1 |     2 | 17595 |     - |   156M |   0 |  12k|  12k|  12k|   0 |  3 |   0 |  22 | 1.899991e+05 | 1.924226e+05 |   1.28%| unknown
+*74.3s|     7 |     2 | 20814 |2334.0 |strongbr|   4 |  12k|  12k|  12k|   0 |  2 |  49 | 399 | 1.900320e+05 | 1.916827e+05 |   0.87%|  13.61%
+*76.2s|    11 |     4 | 21584 |1555.3 |    LP  |   4 |  12k|  12k|  12k|   0 |  2 |  49 | 407 | 1.902999e+05 | 1.916248e+05 |   0.70%|  26.98%
+*77.0s|    16 |     3 | 22216 |1108.8 |    LP  |   5 |  12k|  12k|  12k|   0 |  2 |  52 | 414 | 1.906857e+05 | 1.911014e+05 |   0.22%|  45.65%
+
+SCIP Status        : problem is solved [optimal solution found]
+Solving Time (sec) : 77.76
+Solving Nodes      : 19 (total of 20 nodes in 2 runs)
+Primal Bound       : +1.91101445177056e+05 (18 solutions)
+Dual Bound         : +1.91101445177056e+05
+Gap                : 0.00 %
+Solve Status: optimal
+Solve Time: 77.77 seconds
+Objective Value: 191101.45

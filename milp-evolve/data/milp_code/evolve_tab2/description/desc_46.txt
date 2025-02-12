@@ -1,0 +1,7 @@
+This optimization model focuses on scheduling a set of jobs across multiple machines while respecting precedence, affinity, and machine capacity constraints. 
+Each job has a processing time, and certain jobs have precedence constraints, meaning some must finish before others can start. 
+Jobs are assigned to specific machines, and conflicts are introduced between certain jobs on each machine, requiring sequencing constraints to prevent overlap. 
+Additionally, each machine has a capacity limit on the number of jobs it can handle, influenced by factors such as energy availability, while jobs must also meet zoning compatibility requirements. 
+The objective function minimizes the overall end time, adjusted by penalties for violating affinity preferences and zoning compatibility. 
+The model also considers a "zoning penalty" for jobs that do not comply with zoning compatibility. 
+The resulting optimal schedule minimizes penalties while ensuring jobs are completed in a sequence that respects all constraints.

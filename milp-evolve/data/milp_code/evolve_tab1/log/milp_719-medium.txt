@@ -1,0 +1,107 @@
+presolving:
+(round 1, fast)       3471 del vars, 4446 del conss, 0 add conss, 0 chg bounds, 0 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 2280 clqs
+(round 2, fast)       5694 del vars, 4446 del conss, 0 add conss, 0 chg bounds, 0 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 2280 clqs
+   (0.2s) running MILP presolver
+   (0.2s) MILP presolver found nothing
+(round 3, exhaustive) 5694 del vars, 4446 del conss, 0 add conss, 0 chg bounds, 0 chg sides, 0 chg coeffs, 3528 upgd conss, 0 impls, 2280 clqs
+   (0.5s) probing: 51/2262 (2.3%) - 0 fixings, 0 aggregations, 0 implications, 0 bound changes
+   (0.5s) probing aborted: 50/50 successive totally useless probings
+   (0.6s) symmetry computation started: requiring (bin +, int -, cont +), (fixed: bin -, int +, cont -)
+   (0.7s) no symmetry present
+presolving (4 rounds: 4 fast, 2 medium, 2 exhaustive):
+ 5694 deleted vars, 4446 deleted constraints, 0 added constraints, 0 tightened bounds, 0 added holes, 0 changed sides, 0 changed coefficients
+ 0 implications, 2280 cliques
+presolved problem has 2262 variables (2262 bin, 0 int, 0 impl, 0 cont) and 3528 constraints
+   1248 constraints of type <knapsack>
+   2280 constraints of type <setppc>
+transformed objective value is always integral (scale: 1)
+Presolving Time: 0.63
+
+ time | node  | left  |LP iter|LP it/n|mem/heur|mdpt |vars |cons |rows |cuts |sepa|confs|strbr|  dualbound   | primalbound  |  gap   | compl. 
+p 0.8s|     1 |     0 |     0 |     - |  clique|   0 |2262 |3528 |3528 |   0 |  0 |   0 |   0 | 0.000000e+00 | 6.336600e+04 |    Inf | unknown
+p 0.9s|     1 |     0 |     0 |     - | vbounds|   0 |2262 |3538 |3528 |   0 |  0 |  12 |   0 | 0.000000e+00 | 1.565400e+04 |    Inf | unknown
+  1.2s|     1 |     0 |  1860 |     - |    72M |   0 |2262 |3548 |3528 |   0 |  0 |  22 |   0 | 9.089740e+03 | 1.565400e+04 |  72.22%| unknown
+  1.4s|     1 |     0 |  1874 |     - |    72M |   0 |2262 |3548 |3529 |   1 |  1 |  22 |   0 | 9.089839e+03 | 1.565400e+04 |  72.21%| unknown
+  1.5s|     1 |     0 |  1973 |     - |    73M |   0 |2262 |3548 |3530 |   2 |  2 |  22 |   0 | 9.097788e+03 | 1.565400e+04 |  72.06%| unknown
+  1.7s|     1 |     0 |  2089 |     - |    73M |   0 |2262 |3548 |3531 |   3 |  3 |  22 |   0 | 9.109020e+03 | 1.565400e+04 |  71.85%| unknown
+d 2.9s|     1 |     0 |  5540 |     - |farkasdi|   0 |2262 |3548 |3531 |   0 |  5 |  22 |   0 | 9.109020e+03 | 1.161000e+04 |  27.46%| unknown
+L 4.5s|     1 |     0 | 18563 |     - |    rens|   0 |2262 |3548 |3531 |   3 |  5 |  22 |   0 | 9.109020e+03 | 9.859000e+03 |   8.23%| unknown
+  4.5s|     1 |     0 | 18563 |     - |    74M |   0 |2262 |3548 |3531 |   3 |  5 |  22 |   0 | 9.109020e+03 | 9.859000e+03 |   8.23%| unknown
+  4.6s|     1 |     0 | 18563 |     - |    74M |   0 |2262 |3548 |3129 |   3 |  5 |  22 |   0 | 9.109020e+03 | 9.859000e+03 |   8.23%| unknown
+  4.7s|     1 |     0 | 18564 |     - |    75M |   0 |2262 |3146 |2811 |   4 |  6 |  22 |   0 | 9.109020e+03 | 9.859000e+03 |   8.23%| unknown
+(run 1, node 1) restarting after 650 global fixings of integer variables
+
+(restart) converted 4 cuts from the global cut pool into linear constraints
+
+presolving:
+(round 1, fast)       650 del vars, 11 del conss, 0 add conss, 0 chg bounds, 1 chg sides, 1246 chg coeffs, 0 upgd conss, 0 impls, 1640 clqs
+   (4.8s) running MILP presolver
+   (4.8s) MILP presolver (2 rounds): 0 aggregations, 0 fixings, 0 bound changes
+(round 2, medium)     650 del vars, 82 del conss, 68 add conss, 0 chg bounds, 5 chg sides, 1254 chg coeffs, 0 upgd conss, 0 impls, 1640 clqs
+(round 3, exhaustive) 650 del vars, 82 del conss, 68 add conss, 0 chg bounds, 5 chg sides, 1254 chg coeffs, 4 upgd conss, 0 impls, 1640 clqs
+presolving (4 rounds: 4 fast, 3 medium, 2 exhaustive):
+ 650 deleted vars, 82 deleted constraints, 68 added constraints, 0 tightened bounds, 0 added holes, 5 changed sides, 1254 changed coefficients
+ 0 implications, 1640 cliques
+presolved problem has 1612 variables (1612 bin, 0 int, 0 impl, 0 cont) and 2578 constraints
+    929 constraints of type <knapsack>
+   1640 constraints of type <setppc>
+      9 constraints of type <logicor>
+transformed objective value is always integral (scale: 1)
+Presolving Time: 0.77
+transformed 1/4 original solutions to the transformed problem space
+
+ time | node  | left  |LP iter|LP it/n|mem/heur|mdpt |vars |cons |rows |cuts |sepa|confs|strbr|  dualbound   | primalbound  |  gap   | compl. 
+  5.1s|     1 |     0 | 19988 |     - |    75M |   0 |1612 |2578 |2569 |   0 |  0 |  22 |   0 | 9.109020e+03 | 9.859000e+03 |   8.23%| unknown
+  5.1s|     1 |     0 | 19988 |     - |    75M |   0 |1612 |2578 |2540 |   0 |  0 |  22 |   0 | 9.109020e+03 | 9.859000e+03 |   8.23%| unknown
+  6.0s|     1 |     0 | 20093 |     - |    78M |   0 |1612 |2549 |2509 |   1 |  1 |  22 |   0 | 9.120105e+03 | 9.859000e+03 |   8.10%| unknown
+  6.7s|     1 |     0 | 20204 |     - |    81M |   0 |1612 |2549 |2510 |   2 |  2 |  22 |   0 | 9.126667e+03 | 9.859000e+03 |   8.02%| unknown
+  6.9s|     1 |     0 | 20310 |     - |    81M |   0 |1612 |2549 |2511 |   3 |  3 |  22 |   0 | 9.133554e+03 | 9.859000e+03 |   7.94%| unknown
+  7.0s|     1 |     0 | 20368 |     - |    82M |   0 |1612 |2549 |2512 |   4 |  4 |  22 |   0 | 9.135964e+03 | 9.859000e+03 |   7.91%| unknown
+  7.1s|     1 |     0 | 20498 |     - |    82M |   0 |1612 |2549 |2513 |   5 |  5 |  22 |   0 | 9.144701e+03 | 9.859000e+03 |   7.81%| unknown
+  7.3s|     1 |     0 | 20549 |     - |    82M |   0 |1612 |2549 |2514 |   6 |  6 |  22 |   0 | 9.146273e+03 | 9.859000e+03 |   7.79%| unknown
+  7.5s|     1 |     0 | 20598 |     - |    82M |   0 |1612 |2549 |2515 |   7 |  7 |  22 |   0 | 9.149011e+03 | 9.859000e+03 |   7.76%| unknown
+  7.6s|     1 |     0 | 20654 |     - |    83M |   0 |1612 |2549 |2516 |   8 |  8 |  22 |   0 | 9.151042e+03 | 9.859000e+03 |   7.74%| unknown
+  7.8s|     1 |     0 | 20725 |     - |    83M |   0 |1612 |2549 |2517 |   9 |  9 |  22 |   0 | 9.153238e+03 | 9.859000e+03 |   7.71%| unknown
+  7.9s|     1 |     0 | 20772 |     - |    83M |   0 |1612 |2549 |2518 |  10 | 10 |  22 |   0 | 9.153990e+03 | 9.859000e+03 |   7.70%| unknown
+  8.0s|     1 |     0 | 20835 |     - |    84M |   0 |1612 |2549 |2519 |  11 | 11 |  22 |   0 | 9.156410e+03 | 9.859000e+03 |   7.67%| unknown
+ 11.4s|     1 |     2 | 22336 |     - |    84M |   0 |1612 |2494 |2519 |  11 | 13 |  22 |  22 | 9.284748e+03 | 9.859000e+03 |   6.18%| unknown
+(run 2, node 1) restarting after 53 global fixings of integer variables
+
+(restart) converted 11 cuts from the global cut pool into linear constraints
+
+presolving:
+(round 1, fast)       53 del vars, 0 del conss, 0 add conss, 0 chg bounds, 0 chg sides, 5 chg coeffs, 0 upgd conss, 0 impls, 1588 clqs
+(round 2, exhaustive) 53 del vars, 0 del conss, 0 add conss, 0 chg bounds, 0 chg sides, 5 chg coeffs, 10 upgd conss, 0 impls, 1588 clqs
+presolving (3 rounds: 3 fast, 2 medium, 2 exhaustive):
+ 53 deleted vars, 0 deleted constraints, 0 added constraints, 0 tightened bounds, 0 added holes, 0 changed sides, 5 changed coefficients
+ 0 implications, 1588 cliques
+presolved problem has 1559 variables (1559 bin, 0 int, 0 impl, 0 cont) and 2505 constraints
+    907 constraints of type <knapsack>
+   1588 constraints of type <setppc>
+      1 constraints of type <linear>
+      9 constraints of type <logicor>
+transformed objective value is always integral (scale: 1)
+Presolving Time: 0.85
+transformed 2/5 original solutions to the transformed problem space
+
+ time | node  | left  |LP iter|LP it/n|mem/heur|mdpt |vars |cons |rows |cuts |sepa|confs|strbr|  dualbound   | primalbound  |  gap   | compl. 
+ 11.8s|     1 |     0 | 24134 |     - |    87M |   0 |1559 |2505 |2496 |   0 |  0 |  22 |  22 | 9.284748e+03 | 9.859000e+03 |   6.18%| unknown
+ 15.6s|     1 |     2 | 27154 |     - |    88M |   0 |1559 |2509 |2496 |   0 |  2 |  26 |  43 | 9.285516e+03 | 9.859000e+03 |   6.18%| unknown
+r27.5s|     6 |     4 | 32740 |3808.9 |rounding|   5 |1559 |2509 |2494 |   0 |  0 |  26 | 114 | 9.294877e+03 | 9.658000e+03 |   3.91%|  17.39%
+r28.1s|     7 |     5 | 32857 |3347.4 |rounding|   6 |1559 |2509 |2494 |   0 |  0 |  26 | 122 | 9.294877e+03 | 9.639000e+03 |   3.70%|  17.60%
+*33.1s|    11 |     9 | 35693 |2467.9 |strongbr|  10 |1559 |2513 |2503 |   9 |  5 |  30 | 161 | 9.294877e+03 | 9.624000e+03 |   3.54%|  17.93%
+*39.4s|    35 |    10 | 45234 |1087.7 |strongbr|  13 |1559 |2581 |2500 |  35 |  1 |  98 | 212 | 9.294877e+03 | 9.606000e+03 |   3.35%|  30.10%
+r50.0s|    82 |     1 | 67644 | 741.8 |rounding|  13 |1559 |2638 |2494 |  68 |  0 | 155 | 261 | 9.322614e+03 | 9.447000e+03 |   1.33%|  44.64%
+*50.8s|    84 |     1 | 68758 | 737.4 |strongbr|  13 |1559 |2191 |2494 |  68 |  1 | 168 | 270 | 9.322614e+03 | 9.433000e+03 |   1.18%|  49.81%
+r52.2s|    88 |     3 | 70162 | 720.0 |rounding|  13 |1559 |1878 |2494 |  68 |  0 | 168 | 280 | 9.322765e+03 | 9.370000e+03 |   0.51%|  90.09%
+*52.4s|    92 |     5 | 71712 | 705.7 |    LP  |  13 |1559 |1878 |2494 |  68 |  2 | 168 | 280 | 9.322765e+03 | 9.354000e+03 |   0.34%|  90.27%
+ 52.6s|   100 |     5 | 73002 | 662.6 |    94M |  13 |1559 |1878 |2494 |  68 |  0 | 168 | 280 | 9.322765e+03 | 9.354000e+03 |   0.34%|  91.30%
+
+SCIP Status        : problem is solved [optimal solution found]
+Solving Time (sec) : 53.24
+Solving Nodes      : 105 (total of 107 nodes in 3 runs)
+Primal Bound       : +9.35400000000000e+03 (41 solutions)
+Dual Bound         : +9.35400000000000e+03
+Gap                : 0.00 %
+Solve Status: optimal
+Solve Time: 53.24 seconds

@@ -1,0 +1,42 @@
+feasible solution found by trivial heuristic after 0.2 seconds, objective value 3.600024e+10
+presolving:
+(round 1, fast)       0 del vars, 38 del conss, 0 add conss, 27180 chg bounds, 0 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 2, fast)       5738 del vars, 5738 del conss, 0 add conss, 27180 chg bounds, 0 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 3, fast)       5738 del vars, 5738 del conss, 0 add conss, 35329 chg bounds, 0 chg sides, 0 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 4, fast)       5738 del vars, 5738 del conss, 0 add conss, 35329 chg bounds, 0 chg sides, 8007 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+   (0.6s) running MILP presolver
+   (0.7s) MILP presolver (3 rounds): 0 aggregations, 0 fixings, 506 bound changes
+(round 5, medium)     5738 del vars, 5738 del conss, 0 add conss, 35835 chg bounds, 0 chg sides, 8007 chg coeffs, 0 upgd conss, 0 impls, 0 clqs
+(round 6, exhaustive) 5738 del vars, 5738 del conss, 0 add conss, 35835 chg bounds, 0 chg sides, 8513 chg coeffs, 21300 upgd conss, 0 impls, 0 clqs
+   (1.2s) probing: 51/150 (34.0%) - 0 fixings, 0 aggregations, 0 implications, 0 bound changes
+   (1.2s) probing aborted: 50/50 successive totally useless probings
+   (1.4s) symmetry computation started: requiring (bin +, int -, cont +), (fixed: bin -, int +, cont -)
+   (1.5s) symmetry computation finished: 2 generators found (max: 1500, log10 of symmetry group size: 0.6)
+   (1.5s) no symmetry on binary variables present.
+presolving (7 rounds: 7 fast, 3 medium, 2 exhaustive):
+ 5738 deleted vars, 5738 deleted constraints, 2 added constraints, 35835 tightened bounds, 0 added holes, 0 changed sides, 8513 changed coefficients
+ 21300 implications, 0 cliques
+presolved problem has 21592 variables (150 bin, 0 int, 0 impl, 21442 cont) and 21594 constraints
+  21300 constraints of type <varbound>
+    294 constraints of type <linear>
+Presolving Time: 1.43
+
+ time | node  | left  |LP iter|LP it/n|mem/heur|mdpt |vars |cons |rows |cuts |sepa|confs|strbr|  dualbound   | primalbound  |  gap   | compl. 
+t 1.7s|     1 |     0 |     0 |     - | trivial|   0 |  21k|  21k|   0 |   0 |  0 |   0 |   0 | 0.000000e+00 | 9.849484e+08 |    Inf | unknown
+p 3.0s|     1 |     0 |  4002 |     - |   locks|   0 |  21k|  21k|  21k|   0 |  0 |   0 |   0 | 0.000000e+00 | 2.271164e+08 |    Inf | unknown
+ 38.8s|     1 |     0 | 27634 |     - |   334M |   0 |  21k|  21k|  21k|   0 |  0 |   0 |   0 | 2.268823e+08 | 2.271164e+08 |   0.10%| unknown
+r38.8s|     1 |     0 | 27634 |     - |simplero|   0 |  21k|  21k|  21k|   0 |  0 |   0 |   0 | 2.268823e+08 | 2.271164e+08 |   0.10%| unknown
+ 83.1s|     1 |     0 | 54295 |     - |   349M |   0 |  21k|  21k|  21k| 150 |  1 |   0 |   0 | 2.270695e+08 | 2.271164e+08 |   0.02%| unknown
+ 90.7s|     1 |     0 | 64604 |     - |   355M |   0 |  21k|  21k|  21k| 183 |  2 |   0 |   0 | 2.270938e+08 | 2.271164e+08 |   0.01%| unknown
+ 91.0s|     1 |     0 | 64649 |     - |   358M |   0 |  21k|  21k|  21k| 214 |  3 |   0 |   0 | 2.271164e+08 | 2.271164e+08 |   0.00%| unknown
+ 91.0s|     1 |     0 | 64649 |     - |   358M |   0 |  21k|  21k|  21k| 214 |  3 |   0 |   0 | 2.271164e+08 | 2.271164e+08 |   0.00%| unknown
+
+SCIP Status        : problem is solved [optimal solution found]
+Solving Time (sec) : 90.95
+Solving Nodes      : 1
+Primal Bound       : +2.27116392000000e+08 (6 solutions)
+Dual Bound         : +2.27116392000000e+08
+Gap                : 0.00 %
+Solve Status: optimal
+Solve Time: 90.98 seconds
+Objective Value: 227116392.00

@@ -1,0 +1,49 @@
+# SCIP version 7.0.2
+
+# global shift of all random seeds in the plugins and the LP random seed
+# [type: int, advanced: FALSE, range: [0,2147483647], default: 0]
+randomization/randomseedshift = 0
+
+# seed value for permuting the problem after reading/transformation (0: no permutation)
+# [type: int, advanced: FALSE, range: [0,2147483647], default: 0]
+randomization/permutationseed = 0
+
+# should order of constraints be permuted (depends on permutationseed)?
+# [type: bool, advanced: TRUE, range: {TRUE,FALSE}, default: TRUE]
+randomization/permuteconss = TRUE
+
+# should order of variables be permuted (depends on permutationseed)?
+# [type: bool, advanced: TRUE, range: {TRUE,FALSE}, default: FALSE]
+randomization/permutevars = FALSE
+
+# random seed for LP solver, e.g. for perturbations in the simplex (0: LP default)
+# [type: int, advanced: FALSE, range: [0,2147483647], default: 0]
+randomization/lpseed = 43
+
+# set different random seeds in each concurrent solver?
+# [type: bool, advanced: FALSE, range: {TRUE,FALSE}, default: TRUE]
+concurrent/changeseeds = TRUE
+
+# maximum number of solutions that will be shared in a one synchronization
+# [type: int, advanced: FALSE, range: [0,2147483647], default: 5131912]
+concurrent/initseed = 5131912
+
+# initial random seed value
+# [type: int, advanced: FALSE, range: [0,2147483647], default: 41]
+branching/random/seed = 43
+
+# start seed for random number generation
+# [type: int, advanced: TRUE, range: [0,2147483647], default: 5]
+branching/relpscost/startrandseed = 43
+
+# initial random seed for bandit algorithms and random decisions by neighborhoods
+# [type: int, advanced: FALSE, range: [0,2147483647], default: 113]
+heuristics/alns/seed = 43
+
+# should random seeds of sub-SCIPs be altered to increase diversification?
+# [type: bool, advanced: TRUE, range: {TRUE,FALSE}, default: FALSE]
+heuristics/alns/subsciprandseeds = FALSE
+
+# initial seed used for random tie-breaking in cut selection
+# [type: int, advanced: FALSE, range: [0,2147483647], default: 24301]
+separating/zerohalf/initseed = 43

@@ -1,4 +1,4 @@
-# OptiGuide: GenAI for Decision Intelligence and Optimization
+# OptiGuide: GenAI for Optimization and Decision Intelligence
 
 
 ## Projects

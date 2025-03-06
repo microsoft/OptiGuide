@@ -30,7 +30,7 @@
 ## Dataset Description
 
 - **Homepage:** [The OptiGuide Project](https://www.microsoft.com/en-us/research/project/optiguide-genai-for-supply-chain-optimization/?msockid=1a1ccce4197d663e1c2bdd4318e1678d)
-- **Repository:** [MILP-Evolve](https://github.com/microsoft/MILP-Evolve)
+- **Repository:** [MILP-Evolve](https://github.com/microsoft/OptiGuide/tree/main/milp-evolve)
 - **Dataset:** [Hugging Face](https://huggingface.co/datasets/microsoft/MILP-Evolve)
 - **Paper:** [arXiv]([arXiv](https://arxiv.org/abs/2410.08288)), [openreview](https://openreview.net/forum?id=6yENDA7J4G&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2025%2FConference%2FAuthors%23your-submissions))
 - **Leaderboard:** Beibin Li, Ishai Menache, Sirui Li, Janardhan Kulkarni, Cathy Wu

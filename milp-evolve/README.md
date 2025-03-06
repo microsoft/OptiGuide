@@ -1,22 +1,4 @@
----
-language: English
-license: cdla-2.0
-multilinguality: monolingual
-size_categories:
-  - 100K<n<1M
-source_datasets: original
-task_categories:
-  - multi-task
-  - regression
-  - reinforcement-learning
-  - other
-task_ids:
-  - integrality-gap-prediction
-  - learning-to-branch
-  - language-milp-alignment
----
-
-# Dataset Card for MILP-Evolve
+# Dataset Card for [MILP-Evolve](https://huggingface.co/datasets/microsoft/MILP-Evolve)
 
 ## Table of Contents
 - [Dataset Card for MILP-Evolve](#dataset-card-for-milp-evolve)
@@ -25,10 +7,6 @@ task_ids:
     - [Dataset Summary](#dataset-summary)
     - [Supported Tasks and Leaderboards](#supported-tasks-and-leaderboards)
     - [Languages](#languages)
-  - [Dataset Structure](#dataset-structure)
-    - [Data Instances](#data-instances)
-    - [Data Fields](#data-fields)
-    - [Data Splits](#data-splits)
   - [Dataset Creation](#dataset-creation)
     - [Curation Rationale](#curation-rationale)
     - [Source Data](#source-data)
@@ -53,11 +31,9 @@ task_ids:
 
 - **Homepage:** [The OptiGuide Project](https://www.microsoft.com/en-us/research/project/optiguide-genai-for-supply-chain-optimization/?msockid=1a1ccce4197d663e1c2bdd4318e1678d)
 - **Repository:** [MILP-Evolve](https://github.com/microsoft/MILP-Evolve)
-- **Paper:** [arXiv]([arXiv](https://arxiv.org/abs/2410.08288))
+- **Dataset:** [Hugging Face](https://huggingface.co/datasets/microsoft/MILP-Evolve)
+- **Paper:** [arXiv]([arXiv](https://arxiv.org/abs/2410.08288)), [openreview](https://openreview.net/forum?id=6yENDA7J4G&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2025%2FConference%2FAuthors%23your-submissions))
 - **Leaderboard:** Beibin Li, Ishai Menache, Sirui Li, Janardhan Kulkarni, Cathy Wu
-- **Point of Contact:**
-  - [beibin.li@microsoft.com](mailto:beibin.li@microsoft.com)
-  - Sirui Li
 
 ### Dataset Summary
 
@@ -74,84 +50,6 @@ MILP-Evolve is a large-scale dataset of Mixed Integer Linear Programming (MILP) 
 ### Languages
 
 The dataset is primarily in English. It includes Python code for MILP formulations, natural language descriptions in English, and standard MILP file formats like MPS.
-
-## Dataset Structure
-
-### Data Instances
-
-An example of a data instance for integrality gap prediction:
-
-```json
-{
-  "milp_class": "ConferenceRoomScheduling",
-  "instance_id": "CRS_001",
-  "num_variables": 500,
-  "num_constraints": 300,
-  "density": 0.05,
-  "integrality_gap": 0.12
-}
-```
-
-An example for learning to branch:
-
-```json
-{
-  "milp_instance": "SetCover_123",
-  "branching_decisions": [
-    {"node": 1, "variable": "x_5", "decision": "branch_up"},
-    {"node": 2, "variable": "x_12", "decision": "branch_down"}
-    // ...
-  ],
-  "solve_time": 150.5
-}
-```
-
-An example for language-MILP alignment:
-
-```json
-{
-  "milp_instance": "ResourceAllocation_456",
-  "description": "Optimize the allocation of resources to maximize profit while adhering to budget constraints.",
-  "graph_features": {
-    "nodes": [...],
-    "edges": [...],
-    "node_features": [...],
-    "edge_features": [...]
-  }
-}
-```
-
-### Data Fields
-
-- **milp_class:** String identifier for the MILP class.
-- **instance_id:** Unique identifier for each MILP instance.
-- **num_variables:** Integer count of variables in the instance.
-- **num_constraints:** Integer count of constraints in the instance.
-- **density:** Float representing the density of the constraint matrix.
-- **integrality_gap:** Float value of the integrality gap (for integrality gap prediction task).
-- **branching_decisions:** List of branching decisions taken during the solve (for learning to branch task).
-- **solve_time:** Float representing the time taken to solve the instance.
-- **description:** Natural language description of the MILP instance (for language-MILP alignment task).
-- **graph_features:** Graph representation of the MILP instance, including nodes, edges, and associated features.
-
-### Data Splits
-
-For **Integrality Gap Prediction**:
-
-- **Training Set:** 38,256 instances from 643 classes.
-- **Validation Set:** 9,564 instances from the same classes as training.
-- **Test Set:** 11,584 instances from 157 unseen classes.
-
-For **Learning to Branch**:
-
-- **Training Set:** Data from 579 classes, totaling 26,502 instances.
-- **Validation Set:** Data from 59 classes, totaling 512 instances.
-- **Test Set:** Data from 162 classes, totaling 4,756 instances.
-
-For **Language-MILP Alignment**:
-
-- **Training Set:** Instances from 80% of the classes.
-- **Test Set:** Instances from the remaining 20% of the classes.
 
 ## Dataset Creation
 

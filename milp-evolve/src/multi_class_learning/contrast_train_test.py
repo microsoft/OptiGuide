@@ -52,7 +52,7 @@ def encode_with_diskcache(model_name: str, texts: list):
     ans =  torch.tensor(ans)
     return ans.reshape(len(texts), -1)
 
-def run(mode, epoch, text_encoder, image_encoder, text_optimizer, image_optimizer, dataloader,
+def run(mode, epoch, text_encoder, milp_encoder, text_optimizer, milp_optimizer, dataloader,
         device='cuda', freeze_text_encoder=True, repeats=1, print_iters=10, writer=None):
     global OUT
     # Check if mode is valid
@@ -64,7 +64,7 @@ def run(mode, epoch, text_encoder, image_encoder, text_optimizer, image_optimize
 
     if not freeze_text_encoder:
         text_encoder.train() if mode == "train" else text_encoder.eval()
-    image_encoder.train() if mode == "train" else image_encoder.eval()
+    milp_encoder.train() if mode == "train" else milp_encoder.eval()
 
     epoch_loss = 0.0
     running_n = 0
@@ -94,20 +94,20 @@ def run(mode, epoch, text_encoder, image_encoder, text_optimizer, image_optimize
                 text_features = text_features.float()
                 
                 if mode == "train":
-                    image_optimizer.zero_grad()
+                    milp_optimizer.zero_grad()
 
                 assert text_features.shape == (len(text_inputs), 4096)
 
                 # Forward pass through the encoders
-                image_features = image_encoder(images) # [bs, n_out_neurons]
+                milp_features = milp_encoder(images) # [bs, n_out_neurons]
 
                 # Normalize the features
                 text_features = F.normalize(text_features, p=2, dim=1)
-                image_features = F.normalize(image_features, p=2, dim=1)
+                milp_features = F.normalize(milp_features, p=2, dim=1)
 
                 # Calculate the logits (dot product of text and image features)
-                logits_per_image = image_features @ text_features.T
-                logits_per_text = text_features @ image_features.T
+                logits_per_image = milp_features @ text_features.T
+                logits_per_text = text_features @ milp_features.T
 
                 # Labels for contrastive learning
                 labels = torch.arange(len(text_inputs)).to(device)
@@ -125,12 +125,12 @@ def run(mode, epoch, text_encoder, image_encoder, text_optimizer, image_optimize
 
                 # calculate 4-way accuracy
                 if len(text_inputs) >= 4:
-                    image_features_4way = image_features[:4, :]
+                    milp_features_4way = milp_features[:4, :]
                     text_features_4way = text_features[:4, :]
-                    logits_per_image_4way = image_features_4way @ text_features_4way.T
-                    logits_per_text_4way = text_features_4way @ image_features_4way.T
+                    logits_per_milp_4way = milp_features_4way @ text_features_4way.T
+                    logits_per_text_4way = text_features_4way @ milp_features_4way.T
                     labels_4way = torch.arange(4).to(device)
-                    acc_4way_i2t = (torch.argmax(logits_per_image_4way, dim=1) == labels_4way).float().mean()
+                    acc_4way_i2t = (torch.argmax(logits_per_milp_4way, dim=1) == labels_4way).float().mean()
                     acc_4way_t2i = (torch.argmax(logits_per_text_4way, dim=1) == labels_4way).float().mean()
                     accs["4way-i2t"].append(acc_4way_i2t.item())
                     accs["4way-t2i"].append(acc_4way_t2i.item())
@@ -140,7 +140,7 @@ def run(mode, epoch, text_encoder, image_encoder, text_optimizer, image_optimize
                     loss.backward()
                     if not freeze_text_encoder:
                         text_optimizer.step()
-                    image_optimizer.step()
+                    milp_optimizer.step()
 
                 # Accumulate loss
                 epoch_loss += loss.item()
@@ -259,22 +259,22 @@ else:
     test_miplib_loader = None
 
 # MAIN #
-image_encoder =  MyGNNAttn(emb_size=args.embed_size, n_out_neurons=4096, dropout=args.dropout, max_token_attn=args.max_token_attn,  
+milp_encoder =  MyGNNAttn(emb_size=args.embed_size, n_out_neurons=4096, dropout=args.dropout, max_token_attn=args.max_token_attn,  
                     n_attn_iters=args.n_attn_layers, n_gnn_iters=args.n_gnn_layers, edge_nfeats=1)
 
 if args.load_from and args.load_from != "None.pt":
     state_dict = torch.load(os.path.join(args.log_root, args.load_from))
-    image_encoder.load_state_dict(state_dict)
+    milp_encoder.load_state_dict(state_dict)
 
 
-image_encoder =  image_encoder.cuda()
+milp_encoder =  milp_encoder.cuda()
 # print the number of trainable parameters, split with comma in thousands
-n_trainable_params = sum(p.numel() for p in image_encoder.parameters() if p.requires_grad)
+n_trainable_params = sum(p.numel() for p in milp_encoder.parameters() if p.requires_grad)
 print(f"Number of trainable parameters: {n_trainable_params:,}")
 
 # Optimizers for the encoders (only used in training mode)
 text_optimizer = None # optim.Adam(text_encoder.parameters(), lr=0.0001)
-image_optimizer = optim.Adam(image_encoder.parameters(), lr=lr)
+milp_optimizer = optim.Adam(milp_encoder.parameters(), lr=lr)
 
 
 OUT_FILE = os.path.join(args.log_root, f"{args.dataset}_use_attn_embed_{args.embed_size}_num_milp_{args.num_milp_instance}-{args.num_milp_class}_layser_{args.n_attn_layers}_{args.n_gnn_layers}_output.txt")
@@ -297,31 +297,31 @@ writer.add_text("args", str(args))
 
 if args.dataset == "miplib" and valid_dataloader:
     # let's do zero-shot eval first.
-    run("validation", -1, text_encoder, image_encoder, text_optimizer, image_optimizer, valid_dataloader,
+    run("validation", -1, text_encoder, milp_encoder, text_optimizer, milp_optimizer, valid_dataloader,
             device='cuda', freeze_text_encoder=True, repeats=validation_repeats, print_iters=args.print_iters, writer=writer) 
 
 for epoch in range(args.epochs):
-    run("train", epoch, text_encoder, image_encoder, text_optimizer, image_optimizer, train_dataloader,
+    run("train", epoch, text_encoder, milp_encoder, text_optimizer, milp_optimizer, train_dataloader,
              device='cuda', freeze_text_encoder=True, print_iters=args.print_iters, writer=writer) 
 
-    torch.save(image_encoder.state_dict(), 
+    torch.save(milp_encoder.state_dict(), 
             os.path.join(args.log_root, 
-            f"{args.dataset}_image_encoder_use_attn_embed_{args.embed_size}_num_milp_{args.num_milp_instance}-{args.num_milp_class}_epoch{epoch}.pt"))
+            f"{args.dataset}_milp_encoder_use_attn_embed_{args.embed_size}_num_milp_{args.num_milp_instance}-{args.num_milp_class}_epoch{epoch}.pt"))
 
     if args.save_to:
-        torch.save(image_encoder.state_dict(), os.path.join(args.log_root, args.save_to))
+        torch.save(milp_encoder.state_dict(), os.path.join(args.log_root, args.save_to))
 
     if epoch == args.epochs - 1 or epoch % args.eval_epochs == 0:
         if valid_dataloader:
-            run("validation", epoch, text_encoder, image_encoder, text_optimizer, image_optimizer, valid_dataloader,
+            run("validation", epoch, text_encoder, milp_encoder, text_optimizer, milp_optimizer, valid_dataloader,
                 device='cuda', freeze_text_encoder=True, repeats=validation_repeats, print_iters=args.print_iters, writer=writer) 
 
         if test_ours_dataloader:
-            run("test_ours", epoch, text_encoder, image_encoder, text_optimizer, image_optimizer, test_ours_dataloader,
+            run("test_ours", epoch, text_encoder, milp_encoder, text_optimizer, milp_optimizer, test_ours_dataloader,
                 device='cuda', freeze_text_encoder=True, repeats=1, print_iters=args.print_iters, writer=writer) 
 
         if test_miplib_loader:
-            run("test_miplib", epoch, text_encoder, image_encoder, text_optimizer, image_optimizer, test_miplib_loader,
+            run("test_miplib", epoch, text_encoder, milp_encoder, text_optimizer, milp_optimizer, test_miplib_loader,
                 device='cuda', freeze_text_encoder=True, repeats=1, print_iters=args.print_iters, writer=writer) 
 
 # Close the SummaryWriter

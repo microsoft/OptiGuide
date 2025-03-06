@@ -275,6 +275,7 @@ CUDA_VISIBLE_DEVICES=0 python -u branching_test.py --n_cpus $N_CPUS \
 - Extract MILP input features: We run the following code to extract the MILP input features. The code is similar to `gap_collect.py`, except here we only solve each MILP instance to the root-node LP relaxation to collect the input feature, and we do not need to solve the MILP instance to optimal (only required to collect gap data).
 
 ```script
+export N_CPUS=60
 export PARENT_DATA_DIR=save_dir/contrast_data    # location to save the milp input features
 export PARENT_INSTANCES_DIR=save_dir/instances/mps/code_v1   # location where the MILP instances are saved
 
@@ -296,12 +297,17 @@ python contrast_mps_conv.py --parent_code_dir $PARENT_CODE_DIR --parent_instance
 
 We then run the following code to split the multi-modal dataset (MILP and text) into disjoint train and test splits. In particular, `$MULTIMODAL_DATA_FILE` is a json file that contains a directory with format `[{"milp": path to the input features of the milp instance, "text_path": path to the text description of the milp instance}, ...]` to split into train and set sets with disjoint MILP classes. The train/test splits are saved as `{out_dir}/train_{out_suffix}_data.pkl.gz` and `{out_dir}/test_{out_suffix}_data.pkl.gz`, which are used to train and test the language-MILP contrastive model.
 
-```script
-export MULTIMODAL_DATA_FILE=[json file that provides the associated milp and text paths]
-export OUT_DIR=save_dir/contrast
-export OUT_SUFFIX=ours
+```
+export PARENT_CODE_DIR=milp_code_v1/code
+export PARENT_DATA_DIR=save_dir/contrast/data
+export PARENT_DESC_DIR=save_dir/contrast/conv
+export PARENT_SAVE_DIR=save_dir/contrast
+export MULTIMODAL_DATA_FILE=save_dir/contrast/data_ours.json
+export OUT_SUFFIX=ours_
 
-python contrast_class_split.py --multimodal_data_file $MULTIMODAL_DATA_FILE --out_dir $OUT_DIR --out_suffix $OUT_SUFFIX
+python contrast_class_split.py --parent_code_dir  $PARENT_CODE_DIR --parent_data_dir $PARENT_DATA_DIR \
+        --parent_desc_dir $PARENT_DESC_DIR --parent_save_dir $PARENT_SAVE_DIR \
+        --multimodal_data_file $MULTIMODAL_DATA_FILE --out_suffix $OUT_SUFFIX
 ```
 
 </details>
@@ -320,3 +326,5 @@ export TEXT_TYPES="description only"
 python contrast_train_test.py --epochs $EPOCH --dataset $DATASET --eval_epochs $EVAL_EPOCHS --print_iters $PRINT_ITERS --text_types $TEXT_TYPES
 ```
 </details>
+
+

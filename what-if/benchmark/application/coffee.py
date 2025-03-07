@@ -1,9 +1,8 @@
 import time
-
+import string
 from gurobipy import GRB, Model
 
 # Example data
-
 capacity_in_supplier = {'supplier1': 150, 'supplier2': 50, 'supplier3': 100}
 
 shipping_cost_from_supplier_to_roastery = {
@@ -16,7 +15,6 @@ shipping_cost_from_supplier_to_roastery = {
 }
 
 roasting_cost_light = {'roastery1': 3, 'roastery2': 5}
-
 roasting_cost_dark = {'roastery1': 5, 'roastery2': 6}
 
 shipping_cost_from_roastery_to_cafe = {
@@ -29,14 +27,11 @@ shipping_cost_from_roastery_to_cafe = {
 }
 
 light_coffee_needed_for_cafe = {'cafe1': 20, 'cafe2': 30, 'cafe3': 40}
-
 dark_coffee_needed_for_cafe = {'cafe1': 20, 'cafe2': 20, 'cafe3': 100}
 
 cafes = list(set(i[1] for i in shipping_cost_from_roastery_to_cafe.keys()))
-roasteries = list(
-    set(i[1] for i in shipping_cost_from_supplier_to_roastery.keys()))
-suppliers = list(
-    set(i[0] for i in shipping_cost_from_supplier_to_roastery.keys()))
+roasteries = list(set(i[1] for i in shipping_cost_from_supplier_to_roastery.keys()))
+suppliers = list(set(i[0] for i in shipping_cost_from_supplier_to_roastery.keys()))
 
 # Create a new model
 model = Model("coffee_distribution")
@@ -44,22 +39,14 @@ model = Model("coffee_distribution")
 # OPTIGUIDE DATA CODE GOES HERE
 
 # Create variables
-x = model.addVars(shipping_cost_from_supplier_to_roastery.keys(),
-                  vtype=GRB.INTEGER,
-                  name="x")
-y_light = model.addVars(shipping_cost_from_roastery_to_cafe.keys(),
-                        vtype=GRB.INTEGER,
-                        name="y_light")
-y_dark = model.addVars(shipping_cost_from_roastery_to_cafe.keys(),
-                       vtype=GRB.INTEGER,
-                       name="y_dark")
+x = model.addVars(shipping_cost_from_supplier_to_roastery.keys(), vtype=GRB.INTEGER, name="x")
+y_light = model.addVars(shipping_cost_from_roastery_to_cafe.keys(), vtype=GRB.INTEGER, name="y_light")
+y_dark = model.addVars(shipping_cost_from_roastery_to_cafe.keys(), vtype=GRB.INTEGER, name="y_dark")
 
 # Set objective
 model.setObjective(
-    sum(x[i] * shipping_cost_from_supplier_to_roastery[i]
-        for i in shipping_cost_from_supplier_to_roastery.keys()) +
-    sum(roasting_cost_light[r] * y_light[r, c] +
-        roasting_cost_dark[r] * y_dark[r, c]
+    sum(x[i] * shipping_cost_from_supplier_to_roastery[i] for i in shipping_cost_from_supplier_to_roastery.keys()) +
+    sum(roasting_cost_light[r] * y_light[r, c] + roasting_cost_dark[r] * y_dark[r, c]
         for r, c in shipping_cost_from_roastery_to_cafe.keys()) + sum(
             (y_light[j] + y_dark[j]) * shipping_cost_from_roastery_to_cafe[j]
             for j in shipping_cost_from_roastery_to_cafe.keys()), GRB.MINIMIZE)
@@ -105,3 +92,32 @@ if m.status == GRB.OPTIMAL:
     print(f'Optimal cost: {m.objVal}')
 else:
     print("Not solved to optimality. Optimization status:", m.status)
+
+
+##### STOP HERE
+# Generate visualization code
+def generate_graph():
+    S = sorted([int(n.strip(string.ascii_letters)) for n in suppliers])
+    R = sorted([int(n.strip(string.ascii_letters)) for n in roasteries])
+    C = sorted([int(n.strip(string.ascii_letters)) for n in cafes])
+
+    return f'''
+digraph G {{graph [layoutType="Sugiyama LR",rankdir=TB,splines=true];
+    {{ rank=same {';'.join(suppliers)}; }}
+    {{ rank=same {';'.join(roasteries)}; }}
+    {{ rank=same {';'.join(cafes)}; }}
+    
+    {" ".join([f'supplier{i} [label="{i}", shape=none, image="app/static/supplier.png", fontsize=30];' for i in S])}
+    {" ".join([f'roastery{i} [label="{i}", shape=none, image="app/static/roaster.png", fontsize=30];' for i in R])}
+    {" ".join([f'cafe{i} [label="{i}", shape=none, image="app/static/cafe.png", fontsize=30];' for i in C])}
+
+    {"; ".join([f'{i[0]} -> {i[1]} [label="{d}"]' for i,d in shipping_cost_from_supplier_to_roastery.items() if x[i].X > 0])};
+    {"; ".join([f'{i[0]} -> {i[1]} [label="{d}"]' for i,d in shipping_cost_from_roastery_to_cafe.items() if y_light[i].X > 0 or y_dark[i].X > 0])};
+
+    edge [style=invis]
+    {" -> ".join([i for i in sorted(suppliers)])};
+    {" -> ".join([i for i in sorted(roasteries)])};
+    {" -> ".join([i for i in sorted(cafes)])};
+}}'''
+
+instance_graph = generate_graph()

@@ -97,27 +97,79 @@ else:
 ##### STOP HERE
 # Generate visualization code
 def generate_graph():
-    S = sorted([int(n.strip(string.ascii_letters)) for n in suppliers])
-    R = sorted([int(n.strip(string.ascii_letters)) for n in roasteries])
-    C = sorted([int(n.strip(string.ascii_letters)) for n in cafes])
+    def supplierStr(s):
+        name = int(s.strip(string.ascii_letters))
+        capacity = capacity_in_supplier[s]
+
+        return f'''< 
+<table border='0' cellborder='0' cellpadding="0" cellspacing="0">
+    <tr>
+        <td rowspan="2" port="link" width="40"><img src="app/static/supplier.png"/></td>
+        <td align="left"><FONT FACE="sans-serif" POINT-SIZE="17"><B>s{name}</B></FONT></td>
+    </tr>
+    <tr>
+        <td align="left" valign="top"><FONT FACE="monospace" POINT-SIZE="8">{capacity}</FONT></td>
+    </tr>
+</table> >'''
+
+    def roasterStr(r):
+        name = int(r.strip(string.ascii_letters))
+        light = roasting_cost_light[r]
+        dark = roasting_cost_dark[r]
+
+        return f'''< 
+<table border='0' cellborder='0' cellpadding="0" cellspacing="0">
+    <tr>
+        <td rowspan="3" port="link" width="50"><img src="app/static/roaster.png"/></td>
+        <td align="left" VALIGN="TOP"><FONT FACE="sans-serif" POINT-SIZE="18"><B>r{name}</B></FONT></td>
+    </tr>
+    <tr>
+        <td ALIGN="LEFT" port="light"><FONT FACE="monospace" POINT-SIZE="8">{light}</FONT></td>
+    </tr>
+    <tr>
+        <td ALIGN="LEFT" port="dark"><FONT FACE="monospace" POINT-SIZE="8"><B>{dark}</B></FONT></td>
+    </tr>
+</table> >'''
+
+    def cafeStr(c):
+        name = int(c.strip(string.ascii_letters))
+        light = light_coffee_needed_for_cafe[c]
+        dark = dark_coffee_needed_for_cafe[c]
+
+        return f'''< 
+<table border='0' cellborder='0' cellpadding="0" cellspacing="0">
+    <tr>
+        <td rowspan="3" port="link" valign="middle"><img src="app/static/cafe.png"/></td>
+        <td align="left"><FONT FACE="sans-serif" POINT-SIZE="18"><B>c{name}</B></FONT></td>
+    </tr>
+    <tr>
+        <td ALIGN="LEFT" port="light"><FONT FACE="monospace" POINT-SIZE="8">{light}</FONT></td>
+    </tr>
+    <tr>
+        <td ALIGN="LEFT" port="dark"><FONT FACE="monospace" POINT-SIZE="8"><B>{dark}</B></FONT></td>
+    </tr>
+</table> >'''
+
 
     return f'''
-digraph G {{graph [layoutType="Sugiyama LR",rankdir=TB,splines=true];
+digraph {{
+    graph [layoutType="Sugiyama LR",rankdir=TB,splines=true];
     {{ rank=same {';'.join(suppliers)}; }}
     {{ rank=same {';'.join(roasteries)}; }}
     {{ rank=same {';'.join(cafes)}; }}
     
-    {" ".join([f'supplier{i} [label="{i}", shape=none, image="app/static/supplier.png", fontsize=30];' for i in S])}
-    {" ".join([f'roastery{i} [label="{i}", shape=none, image="app/static/roaster.png", fontsize=30];' for i in R])}
-    {" ".join([f'cafe{i} [label="{i}", shape=none, image="app/static/cafe.png", fontsize=30];' for i in C])}
+    {" ".join([f'{s} [label={supplierStr(s)}, shape=none];' for s in suppliers])}
+    {" ".join([f'{r} [label={roasterStr(r)}, shape=none];' for r in roasteries])}
+    {" ".join([f'{c} [label={cafeStr(c)}, shape=none];' for c in cafes])}
 
-    {"; ".join([f'{i[0]} -> {i[1]} [label="{d}"]' for i,d in shipping_cost_from_supplier_to_roastery.items() if x[i].X > 0])};
-    {"; ".join([f'{i[0]} -> {i[1]} [label="{d}"]' for i,d in shipping_cost_from_roastery_to_cafe.items() if y_light[i].X > 0 or y_dark[i].X > 0])};
+    {"; ".join([f'{i[0]} -> {i[1]} [label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0"><tr><td align="left"><FONT FACE="monospace" POINT-SIZE="8">{int(x[i].X)}</FONT></td></tr></table>> {"" if x[i].X > 0 else ",style=invis"}]' for i,d in shipping_cost_from_supplier_to_roastery.items()])};
+    {"; ".join([f'{i[0]} -> {i[1]} [label=<<table border="0" cellborder="0" cellpadding="0" cellspacing="0"><tr><td align="left"><FONT FACE="monospace" POINT-SIZE="8">{int(y_light[i].X)}<BR/><B>{int(y_dark[i].X)}</B></FONT></td></tr></table>> {"" if (y_light[i].X > 0 or y_dark[i].X > 0) else ",style=invis"}]' for i,d in shipping_cost_from_roastery_to_cafe.items()])};
 
     edge [style=invis]
     {" -> ".join([i for i in sorted(suppliers)])};
     {" -> ".join([i for i in sorted(roasteries)])};
     {" -> ".join([i for i in sorted(cafes)])};
 }}'''
+
 
 instance_graph = generate_graph()

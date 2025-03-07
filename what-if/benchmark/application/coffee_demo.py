@@ -14,7 +14,7 @@ config_list = [
     # },
     {
         "model": "phi-4",
-        "api_key": "ollama",
+        "api_key": "empty",
         "base_url": "http://localhost:8080/v1",
         "max_retries": 10,
         "price" : [0, 0]
@@ -134,7 +134,6 @@ def visual_callback(message):
     
     d3_code = f'''
 <input id="myslider" type="range" min="0" max="0" step="1" />
-<div id="slider"></div>
 <div id="graph"></div>
 <script src="https://d3js.org/d3.v7.js"></script>
 <script src="https://unpkg.com/@hpcc-js/wasm@2/dist/graphviz.umd.js" type="javascript/worker"></script>
@@ -145,28 +144,43 @@ def visual_callback(message):
             filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .2));
         }}
 
-        .node text {{
-            font: 30px sans-serif;
-            font-weight: bold;
-            stroke: black;
-            stroke-width: 1px;
-            fill: white;
+        .node {{
+            cursor: default;
         }}
 
-        #myslider {{ width: 100%; }}
+        #myslider {{ width: 100%; opacity: 0.2; }}
+        #myslider:hover {{ opacity: 1; }}
+
+        input[type=range] {{-webkit-appearance: none;margin: 18px 0;width: 100%;}}
+        input[type=range]:focus {{outline: none;}}
+        input[type=range]::-webkit-slider-runnable-track {{width: 100%;height: 16px;cursor: pointer;box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;background: #dbdbdb;border-radius: 1.3px;border: 0.2px solid #010101;}}
+        input[type=range]::-webkit-slider-thumb {{box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;border: 1px solid #000000;height: 36px;width: 16px;border-radius: 3px;background: #ffffff;cursor: pointer;-webkit-appearance: none;margin-top: -11px;}}
+        input[type=range]:focus::-webkit-slider-runnable-track {{background: #367ebd;}}
+        input[type=range]::-moz-range-track {{width: 100%;height: 14px;cursor: pointer;box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;background: #dbdbdb;border-radius: 1.3px;border: 0.2px solid #010101;}}
+        input[type=range]::-moz-range-thumb {{box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;border: 1px solid #000000;height: 36px;width: 16px;border-radius: 3px;background: #ffffff;cursor: pointer;}}
+        input[type=range]::-ms-track {{width: 100%;height: 12px;cursor: pointer;background: transparent;border-color: transparent;border-width: 16px 0;color: transparent;}}
+        input[type=range]::-ms-fill-lower {{background: #2a6495;border: 0.2px solid #010101;border-radius: 2.6px;box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;}}
+        input[type=range]::-ms-fill-upper {{background: #dbdbdb;border: 0.2px solid #010101;border-radius: 2.6px;box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;}}
+        input[type=range]::-ms-thumb {{box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;border: 1px solid #000000;height: 36px;width: 16px;border-radius: 3px;background: #ffffff;cursor: pointer;}}
+        input[type=range]:focus::-ms-fill-lower {{background: #dbdbdb;}}
+        input[type=range]:focus::-ms-fill-upper {{background: #367ebd;}}
     </style>
 <script>
-    const scale = 0.8;
     width = window.frameElement.clientWidth;
     height = window.frameElement.clientHeight;
 
     function attributer(datum, index, nodes) {{
-        var selection = d3.select(this);
         if (datum.tag == "svg") {{
             datum.attributes = {{
                 ...datum.attributes,
                 width: width,
-                height: height-25,
+                height: height-50,
+            }};
+        }}
+        else if (datum.tag == "image") {{
+            datum.attributes = {{
+                ...datum.attributes,
+                preserveAspectRatio: "xMidYMid"
             }};
         }}
     }}
@@ -174,32 +188,35 @@ def visual_callback(message):
     const iframe = window.frameElement;
     dotString = [{",".join(['`' + g + '`' for g in st.session_state['visual_history']])}];
 
+    function transitionFactory() {{
+        return d3.transition("main")
+            .ease(d3.easeCubic)
+            .duration(300);
+    }}
+
     G = d3.select("#graph").graphviz()
           .attributer(attributer)
-          .addImage("app/static/supplier.png", "40px", "55px")
-          .addImage("app/static/roaster.png", "60px", "50px")
-          .addImage("app/static/cafe.png", "45px", "80px")
+          .addImage("app/static/supplier.png", "60px", "60px")
+          .addImage("app/static/roaster.png", "60px", "60px")
+          .addImage("app/static/cafe.png", "60px", "60px")
+          .tweenShapes(false)
+          .fade(true)          
           .renderDot(dotString[dotString.length-1]);
 
     function showVal(val) {{
-        G.transition(function () {{
-            return d3.transition()
-                .duration(500);
-        }}).renderDot(dotString[val]);
+        G.transition(transitionFactory).renderDot(dotString[val]);
     }}
 
     d3.select("#myslider")
       .attr("max", dotString.length - 1)
       .attr("value", dotString.length - 1)
-      .attr('width', width-100)
       .on("input", function() {{ showVal(d3.select(this).property("value")); }});
 
     function handleResize() {{
         width = iframe.clientWidth;
         height = iframe.clientHeight;
 
-        d3.select("#myslider").attr('width', width-100);
-        d3.select('#graph svg').attr('width', width).attr('height', height-25);
+        d3.select('#graph svg').attr('width', width).attr('height', height-50);
     }}
 
     handleResize();
@@ -287,7 +304,7 @@ with prompt_tab:
     st.code(st.session_state['prompts'])
 
 with chat_tab:
-    chat_box = st.container(border=True, height=800)
+    chat_box = st.container(border=True, height=300)
     text_box = st.container(border=False)
 
     # Accept user input

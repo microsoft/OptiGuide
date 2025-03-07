@@ -40,6 +40,15 @@ def gen_conv_prefix(path=conv_path):
 
 
 def gen_topic_prefix(path=topic_path):
+    # we uploaded the zipped prefix_prompts.json.tar.gz file to github to save space
+    if not os.path.exists(os.path.join(path, "prefix_prompts.json")):
+        if not os.path.exists(os.path.join(path, "prefix_prompts.json.tar.gz")):
+            raise FileNotFoundError("prefix_prompts.json and prefix_prompts.json.tar.gz both not found")
+
+        import tarfile
+        with tarfile.open(os.path.join(path, "prefix_prompts.json.tar.gz"), "r:gz") as tar:
+            tar.extractall(path)
+    
     topic_info = json.load(open(os.path.join(path, "prefix_prompts.json"), "r"))  
     topic_info = topic_info[-5000:]
 

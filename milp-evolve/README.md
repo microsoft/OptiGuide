@@ -1,55 +1,41 @@
-# Dataset Card for [MILP-Evolve](https://huggingface.co/datasets/microsoft/MILP-Evolve)
 
-## Table of Contents
-- [Dataset Card for MILP-Evolve](#dataset-card-for-milp-evolve)
-  - [Table of Contents](#table-of-contents)
-  - [Dataset Description](#dataset-description)
-    - [Dataset Summary](#dataset-summary)
-    - [Supported Tasks and Leaderboards](#supported-tasks-and-leaderboards)
-    - [Languages](#languages)
-  - [Dataset Creation](#dataset-creation)
-    - [Curation Rationale](#curation-rationale)
-    - [Source Data](#source-data)
-      - [Initial Data Collection and Normalization](#initial-data-collection-and-normalization)
-      - [Who are the source language producers?](#who-are-the-source-language-producers)
-    - [Annotations](#annotations)
-      - [Annotation process](#annotation-process)
-      - [Who are the annotators?](#who-are-the-annotators)
-    - [Personal and Sensitive Information](#personal-and-sensitive-information)
-  - [Considerations for Using the Data](#considerations-for-using-the-data)
-    - [Social Impact of Dataset](#social-impact-of-dataset)
-    - [Discussion of Biases](#discussion-of-biases)
-    - [Other Known Limitations](#other-known-limitations)
-  - [Additional Information](#additional-information)
-    - [Dataset Curators](#dataset-curators)
-    - [Licensing Information](#licensing-information)
-    - [Citation Information](#citation-information)
-    - [Contributions](#contributions)
-  - [Trademarks](#trademarks)
-
-## Dataset Description
+## Towards Foundation Models for Mixed Integer Linear Programming
 
 - **Homepage:** [The OptiGuide Project](https://www.microsoft.com/en-us/research/project/optiguide-genai-for-supply-chain-optimization/?msockid=1a1ccce4197d663e1c2bdd4318e1678d)
 - **Repository:** [MILP-Evolve](https://github.com/microsoft/OptiGuide/tree/main/milp-evolve)
 - **Dataset:** [Hugging Face](https://huggingface.co/datasets/microsoft/MILP-Evolve)
-- **Paper:** [arXiv]([arXiv](https://arxiv.org/abs/2410.08288)), [openreview](https://openreview.net/forum?id=6yENDA7J4G&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2025%2FConference%2FAuthors%23your-submissions))
-- **Leaderboard:** Beibin Li, Ishai Menache, Sirui Li, Janardhan Kulkarni, Cathy Wu
+- **Paper:** [ArXiv](https://arxiv.org/abs/2410.08288), [openreview](https://openreview.net/forum?id=6yENDA7J4G)
 
-### Dataset Summary
 
-MILP-Evolve is a large-scale dataset of Mixed Integer Linear Programming (MILP) problem classes and instances. It is generated using an LLM-based evolutionary framework capable of producing a diverse set of MILP classes with unlimited instances. The dataset is designed to facilitate research in developing foundation models for MILP that generalize across problem classes. It supports multiple learning tasks, including integrality gap prediction, learning to branch, and aligning MILP instances with natural language descriptions.
+### Citation Information
 
-### Supported Tasks and Leaderboards
+Please cite the following paper when using our code or dataset:
 
+```latex
+@article{li2024towards,
+  author    = {Li, Sirui and Kulkarni, Janardhan and Wu, Cathy and Menache, Ishai and Li, Beibin},
+  title     = {Towards Foundation Models for Mixed Integer Linear Programming},
+  booktitle = {The Thirteenth International Conference on Learning Representations},
+  year      = {2025}
+}
+```
+
+### Setup for the OptiGuide Code
+Please refer to [`setup.md`](https://github.com/microsoft/OptiGuide/blob/main/milp-evolve/setup.md) for the detailed setup instructions.
+
+
+----
+
+### [MILP-Evolve](https://huggingface.co/datasets/microsoft/MILP-Evolve) Dataset Summary
+
+MILP-Evolve is a large-scale dataset of Mixed Integer Linear Programming (MILP) problem classes and instances. It is generated using an LLM-based evolutionary framework capable of producing a diverse set of MILP classes with unlimited instances. The dataset is designed to facilitate research in developing foundation models for MILP that generalize across problem classes. It supports multiple learning tasks, including integrality gap prediction, learning to branch, and aligning MILP instances with natural language descriptions. You can find our dataset on [Hugging Face](https://huggingface.co/datasets/microsoft/MILP-Evolve).
+
+### Supported Tasks
 - **Integrality Gap Prediction:** This task involves predicting the integrality gap of MILP instances, which measures the difference between the optimal integer solution and the linear relaxation. Success is typically measured by a low mean squared error or high correlation between predicted and actual gaps. Models like regression-based neural networks can be trained using this dataset.
 
 - **Learning to Branch:** The dataset can be used to train models that learn effective branching strategies within MILP solvers. Performance is measured by metrics such as reduced solve time, smaller branch-and-bound trees, or fewer nodes explored. Reinforcement learning models or imitation learning approaches are commonly used for this task.
 
 - **Language-MILP Alignment:** This new task involves aligning MILP instances with their natural language descriptions. Success is measured by retrieval accuracy or alignment scores. Models like cross-modal transformers or contrastive learning frameworks can be applied.
-
-### Languages
-
-The dataset is primarily in English. It includes Python code for MILP formulations, natural language descriptions in English, and standard MILP file formats like MPS.
 
 ## Dataset Creation
 
@@ -108,19 +94,6 @@ The dataset was curated by the research team behind the MILP-Evolve framework. S
 ### Licensing Information
 
 This dataset is licensed under the [CDLA-2.0](https://cdla.dev/permissive-2-0/).
-
-### Citation Information
-
-Please cite the following paper when using the dataset:
-
-```latex
-@article{li2024towards,
-  author    = {Li, Sirui and Kulkarni, Janardhan and Wu, Cathy and Menache, Ishai and Li, Beibin},
-  title     = {Towards Foundation Models for Mixed Integer Linear Programming},
-  booktitle = {The Thirteenth International Conference on Learning Representations},
-  year      = {2025}
-}
-```
 
 ### Contributions
 

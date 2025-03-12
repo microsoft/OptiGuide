@@ -7,6 +7,11 @@ import autogen
 from autogen.agentchat import Agent, UserProxyAgent
 import streamlit.components.v1 as components
 
+from qdrant_client import models, QdrantClient
+from sentence_transformers import SentenceTransformer
+import json
+import os
+
 config_list = [
     # {
     #     "model": "gpt-4o",
@@ -84,6 +89,50 @@ if 'prompts' not in st.session_state:
     cafes = [c for c in cafes if c != 'cafe1']
     ```
     """
+
+path = os.path.dirname(os.path.realpath(__file__))
+
+if "rag" not in st.session_state:
+    rag = QdrantClient(":memory:") # Create in-memory Qdrant instance
+    encoder = SentenceTransformer("thenlper/gte-small")
+
+    st.session_state.rag = rag
+    st.session_state.encoder = encoder
+
+    # load the datastore
+    rag.create_collection(
+        collection_name="example_qa",
+        vectors_config=models.VectorParams(
+            size=encoder.get_sentence_embedding_dimension(), # Vector size is defined by used model
+            distance=models.Distance.COSINE
+        )
+    )
+
+    with open(path + '/../QAs/coffee.benchmark.json') as f:
+        d = json.load(f)
+    
+    data = [{'q': x['QUESTION'], 'a': x['DATA CODE'] if 'DATA CODE' in x else x['CONSTRAINT CODE']} for x in d['questions']]
+
+    rag.upload_points(
+        collection_name="example_qa",
+        points=[
+            models.PointStruct(
+                id=idx,
+                vector=encoder.encode(doc["q"]).tolist(),
+                payload=doc
+            ) for idx, doc in enumerate(data)
+        ]
+    )
+
+    # # quick test
+    # hits = rag.query_points(
+    #     collection_name="example_qa",
+    #     query=encoder.encode("What are the possible consequences if cafe cafe2's demand grows by 29%?").tolist(),
+    #     limit=3
+    # )
+    # for hit in hits.points:
+    #   print(hit.payload, "score:", hit.score)
+
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -318,6 +367,18 @@ with chat_tab:
             st.session_state['debug_messages'].append({"role": "user", "content": prompt})
 
             st.session_state['agent'].set_sourcecode(st.session_state['tmp_src_code'])  # use the updated source code
+
+            print(prompt)
+            hits = st.session_state.rag.query_points(
+                collection_name="example_qa",
+                query=st.session_state.encoder.encode(prompt).tolist(),  # encode last message only
+                limit=3
+            )
+
+            print("SUCCESSFUL LOOKUP!")
+            st.session_state['agent']._example_qa = "-------------------------------\n".join([f"Question: {x.payload['q']}\nAnswer Code: {x.payload['a']}\n" for x in hits.points])
+            print(st.session_state['agent']._example_qa)
+
             response = st.session_state['user'].initiate_chat(st.session_state['agent'], message=prompt)
             st.session_state.messages.append({"role": "assistant", "content": response.summary})
             st.session_state['debug_messages'].append({"role": "assistant", "content": response.summary})

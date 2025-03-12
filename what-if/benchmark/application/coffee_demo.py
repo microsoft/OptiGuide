@@ -376,7 +376,8 @@ with chat_tab:
             )
 
             print("SUCCESSFUL LOOKUP!")
-            st.session_state['agent']._example_qa = "-------------------------------\n".join([f"Question: {x.payload['q']}\nAnswer Code: {x.payload['a']}\n" for x in hits.points])
+            st.session_state['agent']._example_qa = "-------------------------------\n".join(
+                [f"Question: {x.payload['q']}\nAnswer Code: ```python\n{x.payload['a']}\n```\n" for x in hits.points])
             print(st.session_state['agent']._example_qa)
 
             response = st.session_state['user'].initiate_chat(st.session_state['agent'], message=prompt)

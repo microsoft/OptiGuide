@@ -57,6 +57,10 @@ if "src_code" not in st.session_state:
     with open(r"coffee.py", "r") as f:
         st.session_state["src_code"] = f.read()
 
+if "api_code" not in st.session_state:
+    with open(r"coffee_instance.pyi", "r") as f:
+        st.session_state["api_code"] = f.read()
+
 if "tmp_src_code" not in st.session_state:
     st.session_state['tmp_src_code'] = st.session_state['src_code']
 
@@ -69,25 +73,51 @@ if 'prompts' not in st.session_state:
     z = m.addVars(suppliers, vtype=GRB.BINARY, name="z")
     m.addConstr(sum(z[s] for s in suppliers) <= 1, "_")
     for s in suppliers:
-        m.addConstr(x[s,'roastery2'] <= capacity_in_supplier[s] * z[s], "_")
+        m.addConstr(x[s,'roastery2'] <= instance.capacity_in_supplier[s] * z[s], "_")
     ```
 
     ----------
     Question: What if there's a 13% jump in the demand for light coffee at cafe1?
     Answer Code:
     ```python
-    light_coffee_needed_for_cafe["cafe1"] = light_coffee_needed_for_cafe["cafe1"] * (1 + 13/100)
+    instance.light_coffee_needed_for_cafe["cafe1"] *= (1 + 13/100)
     ```
 
     ----------
-    Question: Remove cafe1
-    Answer Code:
+    Question: Remove roastery2
+    Answer Data:
     ```python
-    shipping_cost_from_roastery_to_cafe = {k:v for k, v in shipping_cost_from_roastery_to_cafe.items() if k[1] != 'cafe1'}
-    light_coffee_needed_for_cafe.pop('cafe1')
-    dark_coffee_needed_for_cafe.pop('cafe1')
-    cafes = [c for c in cafes if c != 'cafe1']
+    instance.delete_roastery('roastery2')
     ```
+
+    ----------
+    Question: Add a cafe called javabrew with light coffee needed of 20 and dark coffee needed of 30, and connect all roasteries to it with a shipping cost of 5.
+    Answer Data:
+    ```python
+    instance.add_cafe('javabrew', 20, 30)
+
+    for r in instance.roasteries:
+        instance.connect_roastery_to_cafe(r, 'javabrew', 5)
+    ```
+
+    ----------
+    Question: Update capacity of supplier1 to 100
+    Answer Data:
+    ```python
+    instance.update_supplier('supplier1', 100)
+
+    for r in instance.roasteries:
+        instance.connect_roastery_to_cafe(r, 'javabrew', 5)
+    ```
+
+    ----------
+    Question: Change cost of burner1 to 3.5 for dark coffee.
+    Answer Data:
+    ```python
+    instance.update_roastery('burner1', dark_cost=3.5)
+    ```
+
+    No other code needed.
     """
 
 path = os.path.dirname(os.path.realpath(__file__))
@@ -282,6 +312,7 @@ if "agent" not in st.session_state:
     st.session_state['agent'] = TrackableAssistantAgent(
         name="assistant",
         source_code=st.session_state['src_code'],
+        doc_str=st.session_state['api_code'],
         debug_times=1,
         example_qa=st.session_state['prompts'],
         llm_config={
@@ -313,6 +344,7 @@ with template_tab:
             st.session_state['agent'] = TrackableAssistantAgent(
                 name="assistant",
                 source_code=st.session_state['src_code'],
+                doc_str=st.session_state['api_code'],
                 debug_times=1,
                 example_qa=st.session_state['prompts'],
                 llm_config={
@@ -340,6 +372,7 @@ with prompt_tab:
             st.session_state['agent'] = TrackableAssistantAgent(
                 name="assistant",
                 source_code=st.session_state['src_code'],
+                doc_str=st.session_state['api_code'],
                 debug_times=1,
                 example_qa=st.session_state['prompts'],
                 llm_config={
@@ -377,7 +410,7 @@ with chat_tab:
 
             print("SUCCESSFUL LOOKUP!")
             st.session_state['agent']._example_qa = "-------------------------------\n".join(
-                [f"Question: {x.payload['q']}\nAnswer Code: ```python\n{x.payload['a']}\n```\n" for x in hits.points])
+                [f"Question: {x.payload['q']}\nAnswer Data: ```python\n{x.payload['a']}\n```\n" for x in hits.points]) + "\n\nNo other code needed.\n"
             print(st.session_state['agent']._example_qa)
 
             response = st.session_state['user'].initiate_chat(st.session_state['agent'], message=prompt)

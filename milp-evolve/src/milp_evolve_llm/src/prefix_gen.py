@@ -47,7 +47,7 @@ def gen_topic_prefix(path=topic_path):
 
         import tarfile
         with tarfile.open(os.path.join(path, "prefix_prompts.json.tar.gz"), "r:gz") as tar:
-            tar.extractall(path)
+            tar.extractall(path, filter="data"))
     
     topic_info = json.load(open(os.path.join(path, "prefix_prompts.json"), "r"))  
     topic_info = topic_info[-5000:]

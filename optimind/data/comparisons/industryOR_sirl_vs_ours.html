@@ -1,0 +1,174 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Sample errors from SIRL cleaned dataset</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+                th { background-color: #f2f2f2; font-weight: bold; }
+                .diff-cell { font-family: monospace; white-space: pre-wrap; }
+                .no-diff { color: #666; font-style: italic; }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+            </style>
+        </head>
+        <body>
+            <h1>Sample errors from SIRL cleaned dataset</h1>
+            <p><strong>File 1: .\OptiMind-data\data\industryOR\industryOR_sirl_cleaned.xlsx</strong></p>
+            <p><strong>File 2: .\OptiMind-data\data\industryOR\industryOR_ours.xlsx</strong></p>
+            <p><strong>Generated: 2025-11-25 21:24:44</strong></p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Row</th>
+                        <th>Description 1</th>
+                        <th>Value 1</th>
+                        <th>Description 2</th>
+                        <th>Value 2</th>
+                        <th>Description Diff</th>
+                        <th>Value Diff</th>
+                        <th>Fix</th>
+                        <th>Fix Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                    <tr>
+                        <td>45</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">A factory produces three types of products, A, B, and C. Each unit of product A requires 1 hour for technical preparation, 10 hours of direct labor, and 3 kg of materials. Each unit of product B requires 2 hours for technical preparation, 4 hours of labor, and 2 kg of materials. Each unit of product C requires 1 hour for technical preparation, 5 hours of labor, and 1 kg of materials. The available technical preparation time is 100 hours, labor time is 700 hours, and materials are 400 kg. The company offers larger discounts for bulk purchases, as detailed in Table 1-22. Determine the company&#x27;s production plan to maximize profit.
+Table 1-22
+| Product A       |           | Product B       |           | Product C       |           |
+|:---------------|:---------:|:---------------|:---------:|:---------------|:---------:|
+| Sales Volume (pieces) | Profit (yuan) | Sales Volume (pieces) | Profit (yuan) | Sales Volume (pieces) | Profit (yuan) |
+| 0 ~ 40         | 10        | 0 ~ 50         | 6         | 0 ~ 100        | 5         |
+| 40 ~ 100       | 9         | 50 ~ 100       | 4         | Above 100      | 4         |
+| 100 ~ 150      | 8         | Above 100      | 3         |                |           |
+| Above 150      | 7         |                |           |                |           |</td>
+                        <td>700</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">A factory produces three types of products, A, B, and C. Each unit of product A requires 1 hour for technical preparation, 10 hours of direct labor, and 3 kg of materials. Each unit of product B requires 2 hours for technical preparation, 4 hours of labor, and 2 kg of materials. Each unit of product C requires 1 hour for technical preparation, 5 hours of labor, and 1 kg of materials. The available technical preparation time is 100 hours, labor time is 700 hours, and materials are 400 kg. The company offers larger discounts for bulk purchases, as detailed in Table 1-22. Determine the company&#x27;s production plan to maximize profit.
+Table 1-22
+| Product A       |           | Product B       |           | Product C       |           |
+|:---------------|:---------:|:---------------|:---------:|:---------------|:---------:|
+| Sales Volume (pieces) | Profit (yuan) | Sales Volume (pieces) | Profit (yuan) | Sales Volume (pieces) | Profit (yuan) |
+| 0 ~ 40         | 10        | 0 ~ 50         | 6         | 0 ~ 100        | 5         |
+| 40 ~ 100       | 9         | 50 ~ 100       | 4         | Above 100      | 4         |
+| 100 ~ 150      | 8         | Above 100      | 3         |                |           |
+| Above 150      | 7         |                |           |                |           |</td>
+                        <td>712</td>
+                        <td class="diff-cell" style="max-width: 500px; word-wrap: break-word;"><span class="no-diff">No differences</span></td>
+                        <td class="diff-cell"><span style="background-color: #ffdddd; text-decoration: line-through;">700</span>  <span style="background-color: #ddffdd; font-weight: bold;">712</span></td>
+                        <td>Incorrect ground truth. Solution that achieves our value: Product A: 62 units (40 units at profit 10, 22 units at profit 9), Product B: 19 units (at profit 6), Product C: 0 units</td>
+                        <td>incorrect ground truth</td>
+                    </tr>
+            
+                    <tr>
+                        <td>70</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">The famous Traveling Salesman Problem (TSP) in operations research can be described as follows: A traveling salesman departs from a certain city, visits two other cities to sell merchandise, and must visit each city exactly once before returning to the original starting city. The distances between the cities are provided in the table below.
+| City |    1    |    2    |    3    |    4    |
+| ---- | ------ | ------ | ------ | ------ |
+| 1    | 0    | 10   | 20   | 12   |
+| 2    | 10   | 0    | 5    | 10   |
+| 3    | 20   | 5    | 0    | 8    |
+| 4    | 15   | 12   | 8    | 0    |
+
+What route should the salesman choose to travel in order to minimize the total distance? Try to formulate an integer programming model for this problem.</td>
+                        <td>35</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">The famous Traveling Salesman Problem (TSP) in operations research can be described as follows: A traveling salesman departs from a certain city, and must visit each city exactly once before returning to the original starting city. The distances between the cities are provided in the table below (the entry at row i and column j represents the cost of going from city i to city j)
+| City |    1    |    2    |    3    |    4    |
+| ---- | ------ | ------ | ------ | ------ |
+| 1    | 0    | 10   | 20   | 12   |
+| 2    | 10   | 0    | 5    | 10   |
+| 3    | 20   | 5    | 0    | 8    |
+| 4    | 15   | 12   | 8    | 0    |
+
+What route should the salesman choose to travel in order to minimize the total distance? Try to formulate an integer programming model for this problem.</td>
+                        <td>35</td>
+                        <td class="diff-cell" style="max-width: 500px; word-wrap: break-word;">The famous Traveling Salesman Problem (TSP) in operations research can be described as follows: A traveling salesman departs from a certain city, <span style="background-color: #ffdddd; text-decoration: line-through;">visits two other cities to sell merchandise,</span>  and must visit each city exactly once before returning to the original starting city. The distances between the cities are provided in the table  <span style="background-color: #ffdddd; text-decoration: line-through;">below.</span>  <span style="background-color: #ddffdd; font-weight: bold;">below (the entry at row i and column j represents the cost of going from city i to city j)</span> 
+| City |    1    |    2    |    3    |    4    | 
+| ---- | ------ | ------ | ------ | ------ | 
+| 1    | 0    | 10   | 20   | 12   |</td>
+                        <td class="diff-cell"><span class="no-diff">No differences</span></td>
+                        <td>Ambiguous description: The problem says &quot;departs from a certain city, and must visit each city exactly once before returning to the original starting city&quot;, that implies visiting 3 cities instead of 4 for TSP. Also it&#x27;s not clear in the table the &quot;from city&quot; and &quot;to city&quot; for the distances. We clarified both.</td>
+                        <td>ambiguity</td>
+                    </tr>
+            
+                    <tr>
+                        <td>76</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">A timber storage and transport company has a large warehouse for storing and transporting timber for sale. Due to seasonal price fluctuations, the company purchases timber at the beginning of each quarter, with part of it being sold within the quarter and part being stored for future sales. It is known that the maximum storage capacity of the company’s warehouse is 200,000 m³, and the storage cost is $(a+b u)$ yuan/m³, where $a=70$, $b=100$, and $u$ is the storage time (in quarters). The purchase and sale prices for each quarter and the estimated maximum sales volumes are shown in Table 1-18.
+
+Table 1-18
+| Quarter | Purchase Price (10,000 yuan/10,000 m²) | Sale Price (10,000 yuan/10,000 m²) | Estimated Maximum Sales Volume (10,000 m³) |
+|---------|----------------------------------------|------------------------------------|---------------------------------------------|
+| Winter  | 410                                    | 425                                | 100                                         |
+| Spring  | 430                                    | 440                                | 140                                         |
+| Summer  | 460                                    | 465                                | 200                                         |
+| Autumn  | 450                                    | 455                                | 160                                         |
+
+Since timber is not suitable for long-term storage, all inventory should be sold by the end of autumn. Try to establish a linear programming model for this problem to maximize the company&#x27;s annual profit.</td>
+                        <td>4700</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">A timber storage and transport company has a large warehouse for storing and transporting timber for sale. Due to seasonal price fluctuations, the company purchases timber at the beginning of each quarter, with part of it being sold within the quarter and part being stored for future sales. It is known that the maximum storage capacity of the company&#x27;s warehouse is 200,000 m³, and the storage cost is $(a+b u)$ yuan/m³, where $a=70$, $b=100$, and $u$ is the storage time (in quarters). The purchase and sale prices for each quarter and the estimated maximum sales volumes are shown in Table 1-18.
+
+Table 1-18
+| Quarter | Purchase Price (10,000 yuan/10,000 m²) | Sale Price (10,000 yuan/10,000 m²) | Estimated Maximum Sales Volume (10,000 m³) |
+|---------|----------------------------------------|------------------------------------|---------------------------------------------|
+| Winter  | 410                                    | 425                                | 100                                         |
+| Spring  | 430                                    | 440                                | 140                                         |
+| Summer  | 460                                    | 465                                | 200                                         |
+| Autumn  | 450                                    | 455                                | 160                                         |
+
+Since timber is not suitable for long-term storage, all inventory should be sold by the end of autumn. Try to establish a linear programming model for this problem to maximize the company&#x27;s annual profit. Return your answer in the unit of 10000 yuan.</td>
+                        <td>4700</td>
+                        <td class="diff-cell" style="max-width: 500px; word-wrap: break-word;">A timber storage and transport company has a large warehouse for storing and transporting timber for sale. Due to seasonal price fluctuations, the company purchases timber at the beginning of each quarter, with part of it being sold within the quarter and part being stored for future sales. It is known that the maximum storage capacity of the  <span style="background-color: #ffdddd; text-decoration: line-through;">company’s</span>  <span style="background-color: #ddffdd; font-weight: bold;">company's</span>  warehouse is 200,000 m³, and the storage cost is $(a+b u)$ yuan/m³, where $a=70$, $b=100$, and $u$ is the storage time (in quarters). The purchase and sale prices for each quarter and the estimated maximum sales volumes are shown in Table 1-18.
+
+Table 1-18 
+| Quarter | Purchase Price (10,000 yuan/10,000 m²) | Sale Price (10,000 yuan/10,000 m²) | Estimated Maximum Sales Volume (10,000 m³) | 
+| Summer  | 460                                    | 465                                | 200                                         | 
+| Autumn  | 450                                    | 455                                | 160                                         | 
+
+Since timber is not suitable for long-term storage, all inventory should be sold by the end of autumn. Try to establish a linear programming model for this problem to maximize the company's annual profit.  <span style="background-color: #ddffdd; font-weight: bold;">Return your answer in the unit of 10000 yuan.</span></td>
+                        <td class="diff-cell"><span class="no-diff">No differences</span></td>
+                        <td>The problem asks to maximize annual profit, but it doesn&#x27;t specify the unit. One could return it in yuan, while the ground truth expects unit of 10000 yuan.</td>
+                        <td>ambiguity</td>
+                    </tr>
+            
+                    <tr>
+                        <td>91</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">A company produces two products (A and B), with a profit of £3 and £5 per unit sold, respectively. Each product must be assembled on a specific machine, requiring 12 minutes of assembly time per unit for product A and 25 minutes per unit for product B. The company&#x27;s estimated effective machine working time per week is only 30 hours (due to maintenance or malfunctions). Technical constraints mean that for every five units of product A produced, at least two units of product B must be produced.
+
+Try to formulate a model for this problem.</td>
+                        <td>408.9</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">A company produces two products (A and B), with a profit of £3 and £5 per unit sold, respectively. Each product must be assembled on a specific machine, requiring 12 minutes of assembly time per unit for product A and 25 minutes per unit for product B. The company&#x27;s estimated effective machine working time per week is only 30 hours (due to maintenance or malfunctions). Technical constraints mean that for every five units of product A produced, at least two units of product B must be produced.
+
+Try to formulate a model for this problem.</td>
+                        <td>408</td>
+                        <td class="diff-cell" style="max-width: 500px; word-wrap: break-word;"><span class="no-diff">No differences</span></td>
+                        <td class="diff-cell"><span style="background-color: #ffdddd; text-decoration: line-through;">408.9</span>  <span style="background-color: #ddffdd; font-weight: bold;">408</span></td>
+                        <td>Incorrect ground truth. </td>
+                        <td>incorrect ground truth</td>
+                    </tr>
+            
+                    <tr>
+                        <td>98</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">A company uses steel and aluminum as raw materials to produce two products (A and B). A single unit of product A requires 6 kg of steel, 8 kg of aluminum, 11 hours of labor, and yields a profit of 5000 yuan (excluding worker overtime pay). A single unit of product B requires 12 kg of steel, 20 kg of aluminum, 24 hours of labor, and yields a profit of 11000 yuan (excluding worker overtime pay). The company currently has 200 kg of steel, 300 kg of aluminum, and 300 hours of labor available. If workers need to work overtime, the overtime pay is 100 yuan per hour. Please develop a production plan to maximize the company&#x27;s profit with minimial worker overtime.</td>
+                        <td>137500</td>
+                        <td style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap;">A company uses steel and aluminum as raw materials to produce two products (A and B). A single unit of product A requires 6 kg of steel, 8 kg of aluminum, 11 hours of labor, and yields a profit of 5000 yuan (excluding worker overtime pay). A single unit of product B requires 12 kg of steel, 20 kg of aluminum, 24 hours of labor, and yields a profit of 11000 yuan (excluding worker overtime pay). Products can only be produced in whole units. The company currently has 200 kg of steel, 300 kg of aluminum, and 300 hours of labor available. If workers need to work overtime, the overtime pay is 100 yuan per hour. Please develop a production plan to maximize the company&#x27;s overall profit taking into account worker overtime.</td>
+                        <td>165900</td>
+                        <td class="diff-cell" style="max-width: 500px; word-wrap: break-word;">A company uses steel and aluminum as raw materials to produce two products (A and B). A single unit of product A requires 6 kg of steel, 8 kg of aluminum, 11 hours of labor, and yields a profit of 5000 yuan (excluding worker overtime pay). A single unit of product B requires 12 kg of steel, 20 kg of aluminum, 24 hours of labor, and yields a profit of 11000 yuan (excluding worker overtime pay).  <span style="background-color: #ddffdd; font-weight: bold;">Products can only be produced in whole units.</span>  The company currently has 200 kg of steel, 300 kg of aluminum, and 300 hours of labor available. If workers need to work overtime, the overtime pay is 100 yuan per hour. Please develop a production plan to maximize the company's  <span style="background-color: #ddffdd; font-weight: bold;">overall</span>  profit  <span style="background-color: #ffdddd; text-decoration: line-through;">with minimial</span>  <span style="background-color: #ddffdd; font-weight: bold;">taking into account</span>  worker overtime.</td>
+                        <td class="diff-cell"><span style="background-color: #ffdddd; text-decoration: line-through;">137500</span>  <span style="background-color: #ddffdd; font-weight: bold;">165900</span></td>
+                        <td>Incorrect ground truth. Can produce A=15, B=9, overtime=81</td>
+                        <td>incorrect ground truth</td>
+                    </tr>
+            
+                </tbody>
+            </table>
+            
+            <h3>Legend:</h3>
+            <ul>
+                <li><span style="background-color: #ffdddd; text-decoration: line-through;">Removed text</span></li>
+                <li><span style="background-color: #ddffdd; font-weight: bold;">Added text</span></li>
+            </ul>
+        </body>
+        </html>
+        

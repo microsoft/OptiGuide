@@ -30,6 +30,18 @@ The [milp-evolve](milp-evolve/) folder includes the following material to open s
 }
 ```
 
+### OptiMind: Teaching LLMs to Think Like Optimization Experts
+The [optimind](optimind/) folder includes the following material to open source the paper, evaluation code, and test data for the OptiMind project: 
+
+```
+@article{zhang2025optimind,
+  title={OptiMind: Teaching LLMs to Think Like Optimization Experts},
+  author={Zhang, Xinzhi and Chen, Zeyi and Zope, Humishka and Barbalho, Hugo and Mellou, Konstantina and Molinaro, Marco and Kulkarni, Janardhan and Menache, Ishai and Li, Sirui},
+  journal={arXiv preprint arXiv:2509.22979},
+  year={2025}
+}
+```
+
 
 ## Responsible AI Considerations  
 

@@ -1,8 +1,12 @@
 # OptiMind: Teaching LLMs to Think Like Optimization Experts
 
-[![arXiv](https://img.shields.io/badge/arXiv-2509.22979-b31b1b.svg)](https://arxiv.org/abs/2509.22979)\
-[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-OptiMind--SFT-blue)](https://huggingface.co/microsoft/OptiMind-SFT)\
+<div align="center">
+
+[![arXiv](https://img.shields.io/badge/arXiv-2509.22979-b31b1b.svg)](https://arxiv.org/abs/2509.22979)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-OptiMind--SFT-blue)](https://huggingface.co/microsoft/OptiMind-SFT)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://mit-license.org/)
+
+</div>
 
 This repository contains the official evaluation code and cleaned datasets for the paper **"OptiMind: Teaching LLMs to Think Like Optimization Experts"**.
 

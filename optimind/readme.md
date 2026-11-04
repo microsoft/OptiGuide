@@ -1,22 +1,24 @@
-# OptiMind: Teaching LLMs to Think Like Optimization Experts
+# OptiMind: Improving Small Language Models for Optimization Modeling through Formulation Guidance and Multi-Turn Learning
 
 <div align="center">
 
 [![arXiv](https://img.shields.io/badge/arXiv-2509.22979-b31b1b.svg)](https://arxiv.org/abs/2509.22979)
-[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-OptiMind--SFT-blue)](https://huggingface.co/microsoft/OptiMind-SFT)
+[![microsoft/optimind-rl](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-microsoft%2Foptimind--rl-blue)](https://huggingface.co/microsoft/optimind-rl)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://mit-license.org/)
 
 </div>
 
-This repository contains the official evaluation code and cleaned datasets for the paper **"OptiMind: Teaching LLMs to Think Like Optimization Experts"**.
+This repository contains the official evaluation code and cleaned datasets for the paper **"OptiMind: Improving Small Language Models for Optimization Modeling through Formulation Guidance and Multi-Turn Learning"**.
 
 OptiMind is a comprehensive framework designed to enhance Large Language Models (LLMs) for formulating Mixed-Integer Linear Programming (MILP) problems. By systematically integrating optimization domain expertise into both training (via data cleaning) and inference (via class-specific error hints), OptiMind significantly improves formulation accuracy over base models and other open-source baselines.
 
 ## Overview
 
 The repository provides:
+
 1.  **Evaluation Scripts**: The exact code used in our paper to evaluate models using single-turn generation, majority voting, and multi-turn self-correction with solver feedback.
 2.  **Cleaned Benchmarks**: Expert-verified versions of IndustryOR, Mamo-Complex, and OptMATH, where we fixed missing data, ambiguities, and incorrect ground truths.
+3.  **Comprehensive Hint Library**: The expert hints, hybrid hints, and manually created nonlinear hints for OptMATH problems used in our paper.
 
 
 ## Usage
@@ -36,23 +38,23 @@ uv pip install pandas numpy matplotlib json_repair nest_asyncio gurobipy hf_tran
 **Note:** Make sure you have a valid Gurobi license to execute the solver-based evaluation and self-correction loops.
 
 ### 2. Model
-Our fine-tuned model is available on Hugging Face: [microsoft/OptiMind-SFT](https://huggingface.co/microsoft/OptiMind-SFT).
+Our fine-tuned model is available on Hugging Face: [microsoft/optimind-rl](https://huggingface.co/microsoft/optimind-rl).
 
 ### 3. Running Evaluations
 First, clone the repository and navigate to the project directory:
 
 ```bash
 git clone https://github.com/microsoft/OptiGuide.git
-cd OptiMind
+cd OptiGuide/optimind
 ```
 
 We provide shell scripts to automate the evaluation pipeline, which includes running experiments across multiple random seeds, temperatures, and majority-voting configurations. Before running the evaluation scripts, you must update the file paths in `submit_eval.sh` and `submit_eval_gptoss.sh` to match your local environment.
 
-For `gpt-oss-20b` and its fine-tuned variants (including [our fine-tuned model](https://huggingface.co/microsoft/OptiMind-SFT)), use `submit_eval_gptoss.sh`:
+For `gpt-oss-20b` and its fine-tuned variants (including [microsoft/optimind-rl](https://huggingface.co/microsoft/optimind-rl)), use `submit_eval_gptoss.sh`:
 ```
 bash submit_eval_gptoss.sh
 ```
-For other open-source models (e.g., Qwen, Llama), use `submit_eval.sh` that excludes the  `--gpt-oss` and `--reasoning` flags.
+For other open-source models (e.g., Qwen, Llama), use `submit_eval.sh` that excludes the  `--gpt-oss` and `--reasoning-effort` flags.
 ```
 bash submit_eval.sh
 ```
@@ -70,7 +72,9 @@ We provide our rigorously cleaned versions of three challenging benchmarks in th
 - `data/optimind_cleaned_classified_industryor.csv`: Cleaned and classified IndustryOR benchmark.
 - `data/optimind_cleaned_classified_mamo_complex.csv`: Cleaned and classified Mamo-Complex benchmark.
 - `data/optimind_cleaned_classified_optmath.csv`: Cleaned and classified OptMATH benchmark.
-- `data/hints_subset.csv`: The dictionary mapping problem classes to specific error summaries and hints (currently only a small illustrative subset is included).
+- `data/hints/expert_hints.csv`: Expert-curated hints for recurring formulation errors.
+- `data/hints/hybrid_hints.csv`: Hybrid hints combining expert-curated and automatically generated hints.
+- `data/hints/optmath_nonlinear_hints.csv`: Manually created hints for nonlinear OptMATH problems.
 
 ### Dataset Cleaning Comparisons
 
@@ -87,12 +91,13 @@ Each row in these HTML tables contains the Problem Index, Original Problem, Orig
 This project is licensed under the [MIT Licence](https://mit-license.org/).
 
 ## Citation
-If you find our work, code, or datasets useful, please cite our paper:
-```
-@article{zhang2025optimind,
-  title={OptiMind: Teaching LLMs to Think Like Optimization Experts},
+If you find our work, code, or datasets useful, please cite our NeurIPS 2026 paper:
+```bibtex
+@inproceedings{zhang2026optimind,
+  title={OptiMind: Improving Small Language Models for Optimization Modeling through Formulation Guidance and Multi-Turn Learning},
   author={Zhang, Xinzhi and Chen, Zeyi and Zope, Humishka and Barbalho, Hugo and Mellou, Konstantina and Molinaro, Marco and Kulkarni, Janardhan and Menache, Ishai and Li, Sirui},
-  journal={arXiv preprint arXiv:2509.22979},
-  year={2025}
+  booktitle={Advances in Neural Information Processing Systems},
+  year={2026},
+  note={Accepted at NeurIPS 2026}
 }
 ```

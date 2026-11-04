@@ -1,0 +1,9 @@
+﻿problem_class,error analysis
+Second-Order Cone Programming,"[
+  (""The SOC constraint was encoded as ||y_k||_2 <= t_k^2 (equivalently t_k^2 >= sum_i y_{k,i}^2) while leaving t_k unrestricted in sign, which makes the feasible set a nonconvex union of two cones (±t_k)."",
+   ""Model the cone in a convex form: use ||y_k||_2 <= t_k and enforce t_k >= 0. If you keep the squared form, use sum_i y_{k,i}^2 <= t_k^2 AND explicitly add t_k >= 0; do not allow an unrestricted t_k with a squared-radius inequality.""),
+
+  (""Key mistake: Variables declared “free/unrestricted” in the math description were left at the solver’s default lb=0 (nonnegative), incorrectly assuming the default is (−∞,+∞). This changes the feasible region and can invalidate the SOCP."",
+   ""When the formulation says a continuous variable is free, explicitly set lb=−∞, ub=+∞ (or represent v as v⁺−v⁻ with v⁺, v⁻ ≥ 0). Also carefully map the coefficient blocks into Ax=b with the correct RHS per row so the linear equalities match the intended model."")
+]
+"
